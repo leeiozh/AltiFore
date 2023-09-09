@@ -1,0 +1,8 @@
+https://celestrak.org/NORAD/elements/gp.php?CATNR=41240
+https://celestrak.org/NORAD/elements/gp.php?CATNR=39086
+https://celestrak.org/NORAD/elements/gp.php?CATNR=41335
+https://celestrak.org/NORAD/elements/gp.php?CATNR=43437
+https://celestrak.org/NORAD/elements/gp.php?CATNR=43655
+https://celestrak.org/NORAD/elements/gp.php?CATNR=43662
+https://celestrak.org/NORAD/elements/gp.php?CATNR=36508
+https://celestrak.org/NORAD/elements/gp.php?CATNR=46984
