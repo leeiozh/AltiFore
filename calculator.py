@@ -6,8 +6,6 @@ import fiona
 import geopandas as gpd
 import pandas as pd
 
-# from main import colors, color_rgd, path_to_af
-
 path_to_af = __file__[:-len(__file__.split('/')[-1])]
 colors = ['yellow', 'red', 'orange', 'green', 'blue', 'purple', 'pink', 'grey']
 color_rgd = ['FFFF00', 'FF0000', 'FF8000', '009900', '0080FF', '7F00FF', 'FFCCFF', 'C0C0C0']
@@ -44,11 +42,15 @@ def calc(distance, lats, lons, times):
     arr_for_draw = []  # list of coordinates and colors for drawing s map
     alt = calc_alt(distance)  # critical altitude of sat
 
-    for n in range(len(times) - 1):  # loop for periods between neighbors times
+    for n in range(len(times)):  # loop for periods between neighbors times
 
         res_list.append([])
         time1 = ts.from_datetime(times[n])
-        time2 = ts.from_datetime(times[n + 1])
+
+        if n == (len(times) - 1):
+            time2 = ts.from_datetime(times[n] + dt.timedelta(hours=2))
+        else:
+            time2 = ts.from_datetime(times[n + 1])
 
         for i in range(len(SAT_NAMES)):
 
@@ -57,20 +59,23 @@ def calc(distance, lats, lons, times):
             if len(res_sat[0]) > 0:
                 for t in res_sat[0]:
                     ll = wgs84.latlon_of(sat_data[i].at(t))
-                    if len(res_sat[0]) == 3 and t == res_sat[0][1]:
+                    if len(res_sat[0]) == 3:
                         dist_km = dist.geodesic((ll[0].degrees, ll[1].degrees), (lats[n], lons[n])).km
+                        arr_for_draw.append(
+                            [ll[1].degrees, ll[0].degrees, i, round(dist_km), t.utc_datetime().timestamp(), lats[n],
+                             lons[n], n])
 
-                        res_list[n].append(
-                            {'sat_name': SAT_NAMES[i], 'date': t.utc_datetime().date().strftime("%Y-%m-%d"),
-                             'time': t.utc_datetime().time().strftime("%H:%M"),
-                             'dist': round(dist_km, 2), 'color': color_rgd[i]})
+                        if t == res_sat[0][1]:
+                            res_list[n].append(
+                                {'sat_name': SAT_NAMES[i], 'date': t.utc_datetime().date().strftime("%Y-%m-%d"),
+                                 'time': t.utc_datetime().time().strftime("%H:%M"),
+                                 'dist': round(dist_km, 2), 'color': color_rgd[i]})
 
-                        ofile.write(str(SAT_NAMES[i]) + " ")
-                        ofile.write(str(t.utc_datetime().date()) + " " + str(t.utc_datetime().time().strftime("%H:%M")))
-                        ofile.write(f"\nlat {round(ll[0].degrees, 3)}, lon {round(ll[1].degrees, 3)}, "
-                                    f"dist {round(dist_km, 2)} km\n\n")
-
-                    arr_for_draw.append([ll[1].degrees, ll[0].degrees, i])
+                            ofile.write(str(SAT_NAMES[i]) + " ")
+                            ofile.write(
+                                str(t.utc_datetime().date()) + " " + str(t.utc_datetime().time().strftime("%H:%M")))
+                            ofile.write(f"\nlat {round(ll[0].degrees, 3)}, lon {round(ll[1].degrees, 3)}, "
+                                        f"dist {round(dist_km, 2)} km\n\n")
 
         res_list[n] = sorted(res_list[n], key=lambda x: x['time'])
 
