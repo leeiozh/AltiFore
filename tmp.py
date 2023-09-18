@@ -1,73 +1,69 @@
-from tkinter import *
-import random
+import tkinter as tk
+from tkinter import ttk
+from PIL import Image, ImageTk
+from suncalc import get_position
+from numpy import pi
+import datetime
 
-def get_roll():
-    min=1
-    max=6
 
-    die1 = random.randint(min,max)
-    die2 = random.randint(min,max)
+def update_elevation(event):
+    selected_hour = int(slider.get() / 60)  # Get the selected hour from the slider
+    selected_min = int(slider.get() - 60 * selected_hour)
 
-    if die1 == die2:
-        print(die1,'+',die2,'=',die1+die2, '*** You rolled doubles ***')
-    else:
-        print(die1,'+',die2,'=',die1+die2)
-    return die1,die2
+    if selected_hour == 24:
+        selected_hour = 23
+        selected_min = 59
+    selected_time = datetime.datetime(2023, 9, 18, int(selected_hour), int(selected_min))  # Create a datetime object
+    sun_position = get_position(selected_time, latitude, longitude)
+    elevation = sun_position['altitude'] * 180 / pi
+    elevation_label.config(text=f"Sun Elevation: {elevation:.2f} degrees")
+    slider_label.config(text=f"Selected time: {selected_hour:2d}:{selected_min:2d}")
+    sun_label.place(x=slider.get() / 24 / 60 * 270, y=30)
 
-def get_image(index):
-    images = []
-    images.append('die_01_42158_sm.gif')
-    images.append('die_02_42159_sm.gif')
-    images.append('die_03_42160_sm.gif')
-    images.append('die_04_42161_sm.gif')
-    images.append('die_05_42162_sm.gif')
-    images.append('die_06_42164_sm.gif')
-    return images[index-1]
 
-counter = 0
-def counter_label():
-    global counter
-    print('counter_label() counter =', counter)
-    def count():
-        global counter, imgLbl1, imgLbl2
+def slide_left(event):
+    current_value = slider.get()
+    if current_value > 0:
+        slider.set(current_value - 5)
+        update_elevation(event)
 
-        print('count() counter =', counter)
 
-        print(counter)
-        counter += 1
-        if counter > 10:
-           return
+def slide_right(event):
+    current_value = slider.get()
+    if current_value < 24 * 60:
+        slider.set(current_value + 5)
+        update_elevation(event)
 
-        die1, die2 = get_roll()
 
-        imgfile1 = get_image(die1)
-        imgLbl1.image = PhotoImage( file = imgfile1 )
-        imgLbl1.configure( image = imgLbl1.image )
+# Create the main window
+window = tk.Tk()
+window.title("Sun Elevation Calculator")
 
-        imgfile2 = get_image(die2)
-        imgLbl2.image = PhotoImage( file = imgfile2 )
-        imgLbl2.configure( image = imgLbl2.image )
+# Latitude and longitude for your location (update with your coordinates)
+latitude = 55  # Example: New York City
+longitude = 37  # Example: New York City
 
-        imgLbl1.after(10, count)
+# Create a label for the slider
+slider_label = ttk.Label(window, text="Select Time (0 AM to 12 PM):")
+slider_label.pack(padx=10, pady=10)
 
-    if counter >= 10:
-        counter = 0
-    count()
+# Create a slider widget
+slider = ttk.Scale(window, from_=0, to=24 * 60, length=300, orient="horizontal")
+slider.pack(padx=10, pady=10)
+slider_width = slider.winfo_width()
 
-root = Tk()
-root.title("Counting Seconds")
+# Create a label to display the sun elevation
+elevation_label = ttk.Label(window, text="Sun Elevation: 0.00 degrees")
+elevation_label.pack(padx=10, pady=10)
 
-imgLbl1 = Label(root)
-imgLbl1.pack(side =LEFT)
-imgLbl2 = Label(root)
-imgLbl2.pack(side =LEFT)
+sun_image = ImageTk.PhotoImage(Image.open("/home/leeiozh/ocean/AltiFore/sun.png").resize((50, 50)))
+sun_label = ttk.Label(window, image=sun_image, background="")
+sun_label.pack()
 
-counter_label()
+# Bind the slider to the update function
+slider.bind("<Motion>", update_elevation)
+window.bind("<Left>", slide_left)
+window.bind("<Right>", slide_right)
 
-buttonr = Button(root, text='Roll', width=25, command=counter_label)
-buttonr.pack()
-
-buttonq = Button(root, text='Stop', width=25, command=root.destroy)
-buttonq.pack()
-
-root.mainloop()
+# Start the Tkinter main loop
+window.mainloop()

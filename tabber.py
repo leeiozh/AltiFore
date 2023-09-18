@@ -4,44 +4,46 @@ import pandas as pd
 import datetime as dt
 
 
-def convert_list(name_sheet, sheet, list):
+def convert_list(name, sheet, res_list):
     st = 0
-    while len(list[st]) == 0:
+    while len(res_list[st]) == 0:
         st += 1
-    curr_date = list[st][0]['date']
+    curr_date = res_list[st][0]['date']
 
-    k = 0
-    for i in range(st, len(list)):
-        if len(list[i]) != 0:
-            if curr_date != list[i][0]['date']:
-                curr_date = list[i][0]['date']
-                k = 0
-            for j in range(len(list[i])):
-                k += 1
-                sheet.loc[sheet['date'] == curr_date, ("flight" + str(k))] = str(list[i][j]['time'])
+    curr_flight = 0
+    for i in range(st, len(res_list)):
+        if len(res_list[i]) != 0:
+            if curr_date != res_list[i][0]['date']:
+                curr_date = res_list[i][0]['date']
+                curr_flight = 0
+            for j in range(len(res_list[i])):
+                curr_flight += 1
+                sheet.loc[sheet['date'] == curr_date, f"flight {curr_flight}"] = res_list[i][j]['time']
 
-    sheet.to_excel(name_sheet, index=False, engine='openpyxl')
-    wb = openpyxl.load_workbook(name_sheet)
+    sheet.dropna(axis=1, how='all', inplace=True)
+    sheet.to_excel(name, index=False, engine='openpyxl')
+    wb = openpyxl.load_workbook(name)
     ws = wb['Sheet1']
-    alhpabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']
-    d = (sheet.index[sheet['date'] == curr_date][0]) + 2
+    alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']
 
-    for i in range(len(list)):
-        if len(list[i]) != 0:
+    letter = 0
+    row = (sheet.index[sheet['date'] == curr_date][0]) + 2
+    for i in range(len(res_list)):
+        if len(res_list[i]) != 0:
+            if curr_date != res_list[i][0]['date']:
+                curr_date = res_list[i][0]['date']
+                letter = 0
+                row = (sheet.index[sheet['date'] == curr_date][0]) + 2
 
-            if curr_date != list[i][0]['date']:
-                curr_date = list[i][0]['date']
-                k = 0
-                d = (sheet.index[sheet['date'] == curr_date][0]) + 2
+            for res_it in res_list[i]:
+                letter += 1
+                ws[str(alphabet[letter] + str(row))].fill = PatternFill(patternType='solid', fgColor=res_it['color'])
 
-            for j in range(len(list[i])):
-                k += 1
-                ws[str(alhpabet[k] + str(d))].fill = PatternFill(patternType='solid', fgColor=list[i][j]['color'])
-
-    wb.save(name_sheet)
+    wb.save(name)
 
 
 def prepare_sheet(start, nums):
-    res = pd.DataFrame(columns=['date'])
+    res = pd.DataFrame(columns=['date', 'flight 1', 'flight 2', 'flight 3', 'flight 4', 'flight 5', 'flight 6',
+                                'flight 7', 'flight 8', 'flight 9', 'flight 10', 'flight 11', 'flight 12'])
     res['date'] = [(start + dt.timedelta(days=i)).strftime("%Y-%m-%d") for i in range(nums)]
     return res
