@@ -1,222 +1,222 @@
 CRYOSAT 2 2023-10-10 12:16
-lat 54.901, lon 20.25, dist 22.07 km
+lat 54.905, lon 20.25, dist 22.02 km
 
 HAIYANG-2B 2023-10-10 16:00
-lat 55.028, lon 18.048, dist 22.06 km
+lat 55.025, lon 18.05, dist 22.07 km
 
 JASON-3 2023-10-11 01:08
-lat 55.848, lon 15.05, dist 164.89 km
+lat 55.848, lon 15.051, dist 164.89 km
 
 CFOSAT 2023-10-11 06:27
-lat 54.824, lon 14.581, dist 48.65 km
+lat 54.825, lon 14.601, dist 47.45 km
 
 SENTINEL-6 2023-10-11 08:04
-lat 54.033, lon 12.011, dist 148.18 km
+lat 54.036, lon 12.009, dist 148.11 km
 
 HAIYANG-2B 2023-10-11 16:23
-lat 55.392, lon 12.238, dist 19.94 km
+lat 55.388, lon 12.24, dist 19.94 km
 
 CFOSAT 2023-10-11 17:14
-lat 55.819, lon 11.31, dist 86.56 km
+lat 55.828, lon 11.326, dist 85.35 km
 
 SENTINEL-3B 2023-10-11 20:04
-lat 56.602, lon 15.699, dist 199.61 km
+lat 56.612, lon 15.689, dist 199.4 km
 
 JASON-3 2023-10-12 01:31
-lat 57.744, lon 10.125, dist 142.91 km
+lat 57.745, lon 10.127, dist 142.91 km
 
 CRYOSAT 2 2023-10-12 00:20
-lat 56.811, lon 12.047, dist 21.39 km
+lat 56.804, lon 12.047, dist 21.3 km
 
 JASON-3 2023-10-12 07:22
-lat 58.061, lon 11.935, dist 60.37 km
+lat 58.06, lon 11.937, dist 60.37 km
 
 SENTINEL-3A 2023-10-12 10:29
 lat 58.207, lon 6.771, dist 176.88 km
 
 HAIYANG-2B 2023-10-12 16:45
-lat 56.781, lon 5.784, dist 156.15 km
+lat 56.789, lon 5.779, dist 156.16 km
 
 SARAL 2023-10-12 18:25
-lat 57.726, lon 5.585, dist 167.84 km
+lat 57.721, lon 5.582, dist 167.81 km
 
 JASON-3 2023-10-13 07:44
-lat 56.198, lon 7.055, dist 169.08 km
+lat 56.197, lon 7.056, dist 169.07 km
 
 HAIYANG-2B 2023-10-13 17:07
-lat 53.843, lon 1.943, dist 171.1 km
+lat 53.85, lon 1.938, dist 171.12 km
 
 CRYOSAT 2 2023-10-13 13:02
-lat 54.215, lon 6.205, dist 115.55 km
+lat 54.212, lon 6.203, dist 115.48 km
 
 SENTINEL-3B 2023-10-13 20:52
-lat 53.734, lon 5.12, dist 89.46 km
+lat 53.736, lon 5.115, dist 89.19 km
 
 CFOSAT 2023-10-14 07:18
-lat 52.156, lon 0.833, dist 111.07 km
+lat 52.158, lon 0.858, dist 109.43 km
 
 JASON-3 2023-10-14 08:07
-lat 52.727, lon 3.983, dist 141.84 km
+lat 52.726, lon 3.984, dist 141.84 km
 
 SENTINEL-3B 2023-10-14 10:40
-lat 51.287, lon 0.7, dist 62.51 km
+lat 51.288, lon 0.696, dist 62.78 km
 
 CFOSAT 2023-10-14 18:03
-lat 50.552, lon 1.023, dist 32.73 km
+lat 50.566, lon 1.043, dist 34.48 km
 
 HAIYANG-2B 2023-10-14 17:28
-lat 50.064, lon -1.7, dist 168.63 km
+lat 50.059, lon -1.697, dist 168.65 km
 
 JASON-3 2023-10-15 00:39
-lat 49.554, lon 0.624, dist 127.58 km
+lat 49.555, lon 0.625, dist 127.58 km
 
 CRYOSAT 2 2023-10-15 01:05
-lat 50.231, lon -0.761, dist 3.67 km
+lat 50.232, lon -0.763, dist 3.56 km
 
 JASON-3 2023-10-15 08:30
-lat 50.511, lon -1.683, dist 162.34 km
+lat 50.52, lon -1.694, dist 162.34 km
 
 SENTINEL-3A 2023-10-15 10:54
-lat 49.591, lon -3.335, dist 10.61 km
+lat 49.592, lon -3.335, dist 10.61 km
 
 HAIYANG-2B 2023-10-15 17:50
-lat 48.864, lon -6.731, dist 150.43 km
+lat 48.858, lon -6.728, dist 150.46 km
 
 SENTINEL-3B 2023-10-15 21:39
-lat 48.878, lon -4.761, dist 85.91 km
+lat 48.871, lon -4.763, dist 85.57 km
 
 JASON-3 2023-10-16 01:01
-lat 48.865, lon -8.641, dist 154.09 km
+lat 48.866, lon -8.64, dist 154.09 km
 
 JASON-3 2023-10-16 08:52
-lat 47.828, lon -7.22, dist 63.5 km
+lat 47.827, lon -7.219, dist 63.5 km
 
 SARAL 2023-10-16 05:54
-lat 47.184, lon -9.725, dist 141.2 km
+lat 47.191, lon -9.728, dist 141.17 km
 
 CRYOSAT 2 2023-10-16 13:51
-lat 46.843, lon -8.878, dist 6.89 km
+lat 46.845, lon -8.879, dist 6.76 km
 
 HAIYANG-2B 2023-10-16 18:12
-lat 46.094, lon -11.109, dist 91.51 km
+lat 46.101, lon -11.112, dist 91.54 km
 
 CFOSAT 2023-10-17 08:10
-lat 45.572, lon -14.159, dist 170.26 km
+lat 45.563, lon -14.131, dist 167.93 km
 
 JASON-3 2023-10-17 09:15
-lat 44.834, lon -12.876, dist 76.95 km
+lat 44.833, lon -12.875, dist 76.95 km
 
 HAIYANG-2B 2023-10-17 18:33
-lat 43.812, lon -15.778, dist 141.14 km
+lat 43.805, lon -15.775, dist 141.17 km
 
 SARAL 2023-10-17 19:12
-lat 43.71, lon -11.651, dist 200.89 km
+lat 43.715, lon -11.649, dist 200.94 km
 
 SENTINEL-3B 2023-10-17 22:26
-lat 42.99, lon -14.619, dist 41.28 km
+lat 42.985, lon -14.623, dist 41.72 km
 
 CRYOSAT 2 2023-10-18 01:50
-lat 43.112, lon -13.657, dist 38.53 km
+lat 43.121, lon -13.66, dist 38.37 km
 
 SENTINEL-3A 2023-10-18 11:19
-lat 40.877, lon -12.263, dist 161.24 km
+lat 40.865, lon -12.268, dist 161.23 km
 
 SENTINEL-3A 2023-10-18 22:38
-lat 40.713, lon -17.127, dist 74.79 km
+lat 40.712, lon -17.126, dist 74.8 km
 
 JASON-3 2023-10-19 00:09
-lat 39.937, lon -13.634, dist 147.49 km
+lat 39.938, lon -13.633, dist 147.49 km
 
 HAIYANG-2B 2023-10-19 07:34
-lat 40.325, lon -14.018, dist 7.53 km
+lat 40.319, lon -14.02, dist 7.46 km
 
 SENTINEL-6 2023-10-19 09:09
-lat 40.518, lon -13.671, dist 41.97 km
+lat 40.519, lon -13.669, dist 42.15 km
 
 CRYOSAT 2 2023-10-20 01:47
-lat 39.597, lon -14.188, dist 90.74 km
+lat 39.588, lon -14.189, dist 90.56 km
 
 SENTINEL-3B 2023-10-20 11:29
-lat 38.995, lon -15.203, dist 0.64 km
+lat 39.0, lon -15.208, dist 0.47 km
 
 SARAL 2023-10-20 19:19
-lat 38.279, lon -14.897, dist 78.44 km
+lat 38.27, lon -14.899, dist 78.5 km
 
 JASON-3 2023-10-21 08:52
-lat 37.877, lon -13.229, dist 39.35 km
+lat 37.876, lon -13.229, dist 39.35 km
 
 HAIYANG-2B 2023-10-21 18:17
-lat 37.36, lon -9.708, dist 174.74 km
+lat 37.351, lon -9.706, dist 174.69 km
 
 JASON-3 2023-10-21 23:21
-lat 37.538, lon -12.441, dist 193.23 km
+lat 37.539, lon -12.44, dist 193.23 km
 
 SENTINEL-3B 2023-10-21 22:20
-lat 36.516, lon -11.53, dist 92.88 km
+lat 36.517, lon -11.538, dist 93.48 km
 
 SARAL 2023-10-22 06:03
-lat 36.473, lon -8.858, dist 60.75 km
+lat 36.47, lon -8.856, dist 60.81 km
 
 SENTINEL-6 2023-10-22 08:23
-lat 36.339, lon -7.998, dist 40.82 km
+lat 36.335, lon -7.992, dist 41.06 km
 
 SENTINEL-3B 2023-10-22 21:54
-lat 36.164, lon -4.872, dist 124.7 km
+lat 36.159, lon -4.878, dist 124.06 km
 
 CRYOSAT 2 2023-10-23 12:58
-lat 36.014, lon -1.358, dist 132.18 km
+lat 36.016, lon -1.36, dist 131.96 km
 
 JASON-3 2023-10-23 22:11
-lat 36.403, lon -1.83, dist 10.78 km
+lat 36.404, lon -1.829, dist 10.78 km
 
 SENTINEL-6 2023-10-24 07:13
-lat 37.692, lon 2.47, dist 190.56 km
+lat 37.695, lon 2.471, dist 190.83 km
 
 SENTINEL-3A 2023-10-24 10:24
-lat 37.386, lon 0.658, dist 92.55 km
+lat 37.374, lon 0.655, dist 92.56 km
 
 SENTINEL-6 2023-10-24 21:43
-lat 37.973, lon 3.423, dist 42.02 km
+lat 37.971, lon 3.425, dist 41.76 km
 
 HAIYANG-2B 2023-10-25 06:20
-lat 38.067, lon 3.854, dist 114.15 km
+lat 38.065, lon 3.853, dist 114.21 km
 
 SENTINEL-3A 2023-10-25 09:57
-lat 37.658, lon 7.294, dist 73.45 km
+lat 37.659, lon 7.294, dist 73.44 km
 
 CRYOSAT 2 2023-10-26 00:01
-lat 37.708, lon 7.938, dist 87.6 km
+lat 37.713, lon 7.935, dist 87.86 km
 
 CRYOSAT 2 2023-10-26 12:05
-lat 37.521, lon 9.772, dist 114.81 km
+lat 37.517, lon 9.769, dist 115.06 km
 
 SENTINEL-3A 2023-10-26 20:48
-lat 35.994, lon 11.534, dist 129.08 km
+lat 35.993, lon 11.535, dist 129.09 km
 
 SENTINEL-6 2023-10-26 20:33
-lat 36.025, lon 13.508, dist 58.5 km
+lat 36.028, lon 13.513, dist 58.81 km
 
 SARAL 2023-10-27 17:19
-lat 35.965, lon 14.618, dist 183.82 km
+lat 35.964, lon 14.619, dist 183.73 km
 
 SENTINEL-3A 2023-10-27 20:22
-lat 35.871, lon 18.123, dist 143.05 km
+lat 35.883, lon 18.119, dist 143.04 km
 
 SARAL 2023-10-28 16:48
-lat 35.323, lon 22.338, dist 150.44 km
+lat 35.321, lon 22.338, dist 150.53 km
 
 SENTINEL-6 2023-10-28 19:23
-lat 34.855, lon 24.132, dist 195.28 km
+lat 34.851, lon 24.134, dist 195.62 km
 
 SARAL 2023-10-29 04:01
-lat 35.359, lon 21.705, dist 154.52 km
+lat 35.361, lon 21.706, dist 154.42 km
 
 HAIYANG-2B 2023-10-29 16:02
-lat 37.193, lon 23.933, dist 27.85 km
+lat 37.193, lon 23.933, dist 27.93 km
 
 SENTINEL-3B 2023-10-30 08:47
-lat 40.376, lon 25.519, dist 78.24 km
+lat 40.38, lon 25.51, dist 79.1 km
 
 JASON-3 2023-10-30 19:07
-lat 40.568, lon 26.522, dist 23.97 km
+lat 40.569, lon 26.523, dist 23.97 km
 

@@ -31,7 +31,11 @@ def calc(distance, lats, lons, times):
     ofile = open(path_to_af + "test.txt", "w")  # output file
 
     sats = load.tle_file(path_to_af + 'tle/tle_data.txt')
-    sat_data = [{sat.name: sat for sat in sats}[name] for name in SAT_NAMES]
+
+    try:
+        sat_data = [{sat.name: sat for sat in sats}[name] for name in SAT_NAMES]
+    except KeyError:
+        return [], []
 
     res_list = []  # list of results with dicts {sat_name, date, time, dist, color} for schedule
     arr_for_draw = []  # list of coordinates and colors for drawing s map
