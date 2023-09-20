@@ -1,6 +1,12 @@
 import numpy as np
+import platform
 
-path_to_af = __file__[:-len(__file__.split('/')[-1])]
+os_var = platform.system()
+if os_var == 'Windows':
+    path_to_af = __file__[:-len(__file__.split('\\')[-1])]
+else:
+    path_to_af = __file__[:-len(__file__.split('/')[-1])]
+
 colors = ['yellow', 'red', 'orange', 'green', 'blue', 'purple', 'pink', 'grey']
 color_rgd = ['FFFF00', 'FF0000', 'FF8000', '009900', '0080FF', '7F00FF', 'FFCCFF', 'C0C0C0']
 SAT_NAMES = ['CFOSAT', 'HAIYANG-2B', 'JASON-3', 'SARAL', 'SENTINEL-3A', 'SENTINEL-3B', 'SENTINEL-6', 'CRYOSAT 2']

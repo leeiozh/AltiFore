@@ -47,7 +47,6 @@ class MainWindow:
         self.root = tk.Tk()
         self.root.title("AltiFore")
         self.root.geometry(f'{self.win_x}x{self.win_y}+{self.center_x}+{self.center_y}')
-        self.root.iconbitmap('@' + path_to_af + '/altifore.ico')
 
         self.right_frame = tk.Frame(self.root)
         self.right_frame.pack(side='right', expand=True, fill='both')
