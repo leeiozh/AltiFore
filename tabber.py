@@ -1,6 +1,6 @@
-import openpyxl
+import openpyxl  # conda install -c conda-forge openpyxl
 from openpyxl.styles import PatternFill
-import pandas as pd
+import pandas as pd  # conda install -c conda-forge pandas
 import datetime as dt
 
 

@@ -1,10 +1,9 @@
-from skyfield.api import load, wgs84, utc
-import geopy.distance as dist
+from skyfield.api import load, wgs84, utc  # conda install -c conda-forge skyfield
+import geopy.distance as dist  # conda install -c conda-forge geopy
 import datetime as dt
-import fiona
-import geopandas as gpd
-import pandas as pd
-from suncalc import get_position, get_times
+import fiona  # conda install -c conda-forge fiona
+import geopandas as gpd  # conda install -c conda-forge geopandas
+import pandas as pd  # conda install -c conda-forge pandas
 from const import *
 
 ts = load.timescale()

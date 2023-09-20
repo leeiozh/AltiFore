@@ -7,14 +7,14 @@ from suncalc import get_position
 
 from datetime import datetime
 import requests
-from skyfield.api import utc
+from skyfield.api import utc  # conda install -c conda-forge skyfield
 from shutil import move
 
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # conda install -c conda-forge matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import matplotlib.ticker as mticker
 from matplotlib.patches import Circle
-import cartopy.crs as ccrs
+import cartopy.crs as ccrs  # conda install -c conda-forge cartopy
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import cartopy.feature as cfe
 from datetime import datetime as dt
@@ -47,7 +47,7 @@ class MainWindow:
         self.root = tk.Tk()
         self.root.title("AltiFore")
         self.root.geometry(f'{self.win_x}x{self.win_y}+{self.center_x}+{self.center_y}')
-        self.root.iconbitmap('@' + path_to_af + '/altifore.xbm')
+        self.root.iconbitmap('@' + path_to_af + '/altifore.ico')
 
         self.right_frame = tk.Frame(self.root)
         self.right_frame.pack(side='right', expand=True, fill='both')
@@ -120,7 +120,7 @@ class MainWindow:
         self.bar = ttk.Progressbar(self.bar_frame, orient="horizontal", length=int(self.win_x * 0.3),
                                    style="LabeledProgressbar")
         self.bar.pack()
-        tle_date = open("/home/leeiozh/ocean/AltiFore/tle/tle_data.txt", 'r').readline()[16:-1]
+        tle_date = open(path_to_af + "tle/tle_data.txt", 'r').readline()[16:-1]
         self.sty.configure("LabeledProgressbar", text="Last update of TLE : " + tle_date)
 
         ### subframe update TLE button ###
@@ -209,7 +209,8 @@ class MainWindow:
             lon = np.sign(lon_str[0]) * (np.abs(lon_str[0]) + (lon_str[1] + lon_str[2] / 60.) / 60.)
 
             dat_str = self.dat_entry.get().split('/')
-            selected_time = datetime(int(dat_str[-1]), int(dat_str[-2]), int(dat_str[-3]), int(selected_hour), int(selected_min))
+            selected_time = datetime(int(dat_str[-1]), int(dat_str[-2]), int(dat_str[-3]), int(selected_hour),
+                                     int(selected_min))
 
             sun_position = get_position(selected_time, lon, lat)
             elevation = sun_position['altitude'] * 180 / np.pi
