@@ -1,0 +1,12 @@
+screeninfo
+tk
+pillow
+skyfield
+matplotlib
+cartopy
+openpyxl
+pandas
+geopy
+fiona
+geopandas
+requests

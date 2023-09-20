@@ -4,28 +4,42 @@ Altimeter Forecaster - программа для расчета пролетов
 
 ## Установка
 
-Сейчас все собирается руками:
-
 ```bash
 git clone https://github.com/leeiozh/AltiFore.git
 cd AltiFore
-conda create --name altifore
-conda activate altifore
-conda install -c conda-forge python=3.11
-conda install -c conda-forge screeninfo, pillow, skyfield, matplotlib, cartopy, openpyxl, pandas, geopy, fiona, geopandas
 ```
 
-Альтернативно:
+### Linux
+
+Сборка не требуется, просто запускаетесь:
+```bash
+./altifore
+```
+
+### Mac
+
+
+### Windows
+
+
+### Ручная сборка
+
+С помощью Anaconda:
 
 ```bash
-git clone https://github.com/leeiozh/AltiFore.git
-cd AltiFore
+conda create --name alti_env
+conda activate alti_env
+conda install -c conda-forge python=3.11
+conda install -c conda-forge screeninfo pillow skyfield matplotlib cartopy openpyxl pandas geopy fiona geopandas
+```
+
+Альтернативно через pip:
+
+```bash
 python3 -m venv alti_env
 source alti_env/bin/activate
-pip install -r requirements.txt
+pip install screeninfo pillow skyfield matplotlib cartopy openpyxl pandas geopy fiona geopandas requests
 ```
-
-Потом постараюсь собрать готовые бинарники.
 
 ## Обновление TLE
 
@@ -36,6 +50,17 @@ pip install -r requirements.txt
 
 1) Ошибка вида "Check your internet connection ..." означает, что нужно перепроверить доступ к интернету. Технически,
    даже если на машине доступ только через прокси, все должно работать.
+
+> **_NOTE:_** Если вы собирались вручную и компьютер подключен через прокси, в терминале можно попробовать сделать следующее:
+> ```bash
+> sudo env http_proxy=http://ezhova:12345@255.255.255.0:4000 python altifore.py
+> ```
+> Где необходимо заменить данные на свой логин и пароль от прокси сервера со своим адресом и портом. Это должно сработать на Linux, на Mac и Windows можно попробовать придумать альтернативы.
+> Если вы не собирались вручную, аналогично стоит попробовать:
+> ```bash
+> sudo env http_proxy=http://ezhova:12345@255.255.255.0:4000 ./altifore
+> ```
+
 2) Ошибка вида "Check links in tle_sites.txt ..." означает, что нужно глазами просмотреть запрашиваемый файл в папке tle
    на наличие опечаток.
 3) Если интернет отвалился во время обновления TLE необходимо обязательно перезапустить программу.
