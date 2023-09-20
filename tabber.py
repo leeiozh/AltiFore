@@ -1,6 +1,6 @@
-import openpyxl
+import openpyxl  # conda install -c conda-forge openpyxl
 from openpyxl.styles import PatternFill
-import pandas as pd
+import pandas as pd  # conda install -c conda-forge pandas
 import datetime as dt
 
 
@@ -24,7 +24,7 @@ def convert_list(name, sheet, res_list):
     sheet.to_excel(name, index=False, engine='openpyxl')
     wb = openpyxl.load_workbook(name)
     ws = wb['Sheet1']
-    alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']
+    alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q']
 
     letter = 0
     row = (sheet.index[sheet['date'] == curr_date][0]) + 2
@@ -44,6 +44,7 @@ def convert_list(name, sheet, res_list):
 
 def prepare_sheet(start, nums):
     res = pd.DataFrame(columns=['date', 'flight 1', 'flight 2', 'flight 3', 'flight 4', 'flight 5', 'flight 6',
-                                'flight 7', 'flight 8', 'flight 9', 'flight 10', 'flight 11', 'flight 12'])
+                                'flight 7', 'flight 8', 'flight 9', 'flight 10', 'flight 11', 'flight 12',
+                                'flight 13', 'flight 14', 'flight 15', 'flight 16'])
     res['date'] = [(start + dt.timedelta(days=i)).strftime("%Y-%m-%d") for i in range(nums)]
     return res

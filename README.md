@@ -9,9 +9,10 @@ Altimeter Forecaster - программа для расчета пролетов
 ```bash
 git clone https://github.com/leeiozh/AltiFore.git
 cd AltiFore
-conda create -y --name alti_env python=3.11
-conda install --force-reinstall -y -q --name alti_env -c conda-forge --file requirements.txt
-conda activate alti_env
+conda create --name altifore
+conda activate altifore
+conda install -c conda-forge python=3.11
+conda install -c conda-forge screeninfo, pillow, skyfield, matplotlib, cartopy, openpyxl, pandas, geopy, fiona, geopandas
 ```
 
 Альтернативно:
