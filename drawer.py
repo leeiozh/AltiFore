@@ -217,7 +217,7 @@ class MainWindow:
             self.slider_label.config(
                 text=f"Selected time: {selected_hour:2d}:{selected_min:2d}        "
                      f"Sun Elevation: {elevation:.2f}" + chr(176))
-            self.sun_label.place(x=self.slider.get() / 24 / 60 * ((self.win_x - 250) * 0.4), y=32)
+            self.sun_label.place(x=self.slider.get() / 24 / 60 * ((self.win_x - 100) * 0.4), y=32)
         except:
             pass
 
