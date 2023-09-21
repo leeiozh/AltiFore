@@ -1,24 +1,9 @@
-CFOSAT 2023-10-10 05:23
-lat -9.749, lon 18.691, dist 146.23 km
+JASON-3 2023-10-11 00:41
+lat -20.632, lon -28.337, dist 187.22 km
 
-CRYOSAT 2 2023-10-10 00:04
-lat -9.885, lon 21.071, dist 118.18 km
+SENTINEL-3B 2023-10-12 11:53
+lat -20.118, lon -31.471, dist 56.92 km
 
-SARAL 2023-10-10 16:26
-lat -9.804, lon 20.107, dist 100.28 km
-
-CFOSAT 2023-10-11 05:09
-lat -12.185, lon 21.94, dist 104.31 km
-
-SENTINEL-3A 2023-10-10 20:50
-lat -12.375, lon 19.339, dist 185.5 km
-
-JASON-3 2023-10-11 21:21
-lat -11.778, lon 23.38, dist 71.89 km
-
-SENTINEL-3A 2023-10-11 20:24
-lat -11.625, lon 25.717, dist 191.62 km
-
-CRYOSAT 2 2023-10-11 11:43
-lat -12.023, lon 24.275, dist 30.04 km
+SENTINEL-6 2023-10-11 14:07
+lat -20.277, lon -32.724, dist 81.66 km
 
