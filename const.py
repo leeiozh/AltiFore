@@ -4,15 +4,18 @@ import platform
 import os
 import sys
 
-if getattr(sys, 'frozen', False):
-    app_dir = os.path.dirname(sys.executable) + '/'
-else:
-    app_dir = os.path.dirname(os.path.abspath(__file__)) + '/'
-
 os_var = platform.system()
 if os_var == 'Windows':
+    if getattr(sys, 'frozen', False):
+        app_dir = os.path.dirname(sys.executable) + '\\'
+    else:
+        app_dir = os.path.dirname(os.path.abspath(__file__)) + '\\'
     path_to_af = app_dir[:-len(app_dir.split('\\')[-1])]
 else:
+    if getattr(sys, 'frozen', False):
+        app_dir = os.path.dirname(sys.executable) + '/'
+    else:
+        app_dir = os.path.dirname(os.path.abspath(__file__)) + '/'
     path_to_af = app_dir[:-len(app_dir.split('/')[-1])]
 
 colors = ['yellow', 'red', 'orange', 'green', 'blue', 'purple', 'pink', 'grey']
