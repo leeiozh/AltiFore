@@ -1,5 +1,5 @@
 import screeninfo
-from drawer import *
+from drawer import MainWindow
 
 if __name__ == "__main__":
     monitor = screeninfo.get_monitors()[0]

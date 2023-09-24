@@ -3,9 +3,8 @@ from tkinter import ttk
 from tkinter import filedialog as fd
 from tkinter import messagebox
 from PIL import Image, ImageTk
-from suncalc import get_position
 
-from datetime import datetime
+from datetime import datetime as dt
 import requests
 from skyfield.api import utc  # conda install -c conda-forge skyfield
 from shutil import move
@@ -17,17 +16,17 @@ from matplotlib.patches import Circle
 import cartopy.crs as ccrs  # conda install -c conda-forge cartopy
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import cartopy.feature as cfe
-from datetime import datetime as dt
 
 from tabber import prepare_sheet, convert_list
-from calculator import calc_from_file, calc
+from calculator import calc_from_file, calc, calc_sun
 from const import *
 
-once_sel = True
-once_cal = True
+once_sel = True  # flag for only one select file
+once_cal = True  # flag for only one run calculation
 
 
 class MyToolbar(NavigationToolbar2Tk):
+    # special toolbar without coordinates for map
     def set_message(self, s):
         pass
 
@@ -35,23 +34,25 @@ class MyToolbar(NavigationToolbar2Tk):
 class MainWindow:
     def __init__(self, monitor_size=(1920, 1080)):
 
-        self.draw_arr = np.ndarray
-        self.res_list = np.ndarray
-        self.tr_lat = []
-        self.tr_lon = []
-        self.win_x = int(monitor_size[0] * 0.8)
-        self.win_y = int(monitor_size[1] * 0.7)
-        self.center_x = int(0.5 * (monitor_size[0] - self.win_x))
-        self.center_y = int(0.5 * (monitor_size[1] - self.win_y))
+        self.draw_arr = np.ndarray  # array of data for drawing [lat_sat, lon_sat, num_sat, dist_km, time, lat_rv, lon_rv, num_dot]]
+        self.res_list = np.ndarray  # array for creating a schedule {sat_name, date, time, dist, color}
+        self.tr_lat = []  # input track latitudes
+        self.tr_lon = []  # input track longitudes
+        self.win_x = int(monitor_size[0] * 0.8)  # width of main window
+        self.win_y = int(monitor_size[1] * 0.7)  # height of main window
+        self.center_x = int(0.5 * (monitor_size[0] - self.win_x))  # x coord of center of main window
+        self.center_y = int(0.5 * (monitor_size[1] - self.win_y))  # y coord of center of main window
 
         self.root = tk.Tk()
         self.root.title("AltiFore")
         self.root.geometry(f'{self.win_x}x{self.win_y}+{self.center_x}+{self.center_y}')
 
+        ### frame for sun and map ###
         self.right_frame = tk.Frame(self.root)
         self.right_frame.pack(side='right', expand=True, fill='both')
         self.right_frame.pack_propagate(False)
 
+        ### frame for sun at the top of right_frame ###
         self.sun_frame = tk.Frame(self.right_frame)
         self.sun_frame.pack(side='top', pady=20)
         self.sun_frame_left = tk.Frame(self.sun_frame)
@@ -64,13 +65,11 @@ class MainWindow:
         self.sun_frame_right.pack(side='right', padx=5)
         self.map_frame = tk.Frame(self.right_frame)
         self.map_frame.pack(side='top', expand=True, fill='both')
-
         ttk.Label(self.sun_frame_left_up, text="Your date ").pack(side='left')
         self.dat_entry = ttk.Entry(self.sun_frame_left_up, width=10)
-        sup_date = datetime.utcnow().date().strftime("%d/%m/%Y")
+        sup_date = dt.utcnow().date().strftime("%d/%m/%Y")
         self.dat_entry.insert(0, sup_date)
         self.dat_entry.pack(side='left', padx=10)
-
         ttk.Label(self.sun_frame_left_down, text="Your latitude ").pack(side='left')
         self.lat_entry = ttk.Entry(self.sun_frame_left_down, width=10)
         self.lat_entry.insert(0, '\u00B1dd mm ss')
@@ -81,7 +80,6 @@ class MainWindow:
         self.lon_entry.pack(side='left', padx=10)
         self.slider_label = ttk.Label(self.sun_frame_right, text="Enter coordinates to calculate Sun elevation. "
                                                                  "Use arrows to move Sun through the day.")
-
         self.slider_label.pack(padx=10, pady=10)
         self.slider = ttk.Scale(self.sun_frame_right, from_=0, to=24 * 60, length=self.win_x * 0.4, orient="horizontal")
         self.slider.pack(padx=10, pady=10)
@@ -92,6 +90,7 @@ class MainWindow:
         self.root.bind("<Left>", self.slide_left)
         self.root.bind("<Right>", self.slide_right)
 
+        ### frame for updating, selection and entering data ###
         self.left_frame = tk.Frame(self.root)
         self.left_frame.pack(side='top', pady=20)
         ttk.Label(self.left_frame,
@@ -176,28 +175,32 @@ class MainWindow:
             ttk.Label(frame, text=labels[column]).pack(side="top")
             self.line_frames.append(frame)
 
-        self.fig = None
-        self.ax = None
-        self.fname = None
-        self.speed_entry = None
-        self.date_entry = None
-        self.time_entry = None
-        self.distance = 200
-        self.toolbar = None
-        self.canvas = None
-        self.canvas_widget = None
-        self.col_loc = None
-        self.scat_loc = None
-        self.col_scat = None
-        self.sat_scat = None
-        self.circ = None
-        self.start_date = None
+        # initializing stuff which appears next
+        self.fig = None  # map figure
+        self.ax = None  # map axes
+        self.fname = None  # name of kml file
+        self.speed_entry = None  # entry of rv speed
+        self.date_entry = None  # entry of start date
+        self.time_entry = None  # entry of start time
+        self.distance = 200  # distance between rv and sat
+        self.toolbar = None  # map toolbar
+        self.canvas = None  # canvas for map
+        self.canvas_widget = None  # canvas widget for map
+        self.col_loc = None  # color location for circle
+        self.scat_loc = None  # scatter location for circle
+        self.col_scat = None  # color of scatter for circle
+        self.sat_scat = None  # sat of scatter for circle
+        self.circ = None  # circle around current highlight point
+        self.start_date = None  # start date of calculation
 
     def update_elevation(self, event):
+        """
+        updating elevation of Sun when user clicks on left or right arrow or on slider
+        """
         selected_hour = int(self.slider.get() / 60)
         selected_min = int(self.slider.get() - 60 * selected_hour)
 
-        if selected_hour == 24:
+        if selected_hour == 24:  # case if 24:00 -> 23:59
             selected_hour = 23
             selected_min = 59
 
@@ -208,36 +211,47 @@ class MainWindow:
             lon = np.sign(lon_str[0]) * (np.abs(lon_str[0]) + (lon_str[1] + lon_str[2] / 60.) / 60.)
 
             dat_str = self.dat_entry.get().split('/')
-            selected_time = datetime(int(dat_str[-1]), int(dat_str[-2]), int(dat_str[-3]), int(selected_hour),
-                                     int(selected_min))
+            selected_time = dt(int(dat_str[-1]), int(dat_str[-2]), int(dat_str[-3]), int(selected_hour),
+                               int(selected_min))
 
-            sun_position = get_position(selected_time, lon, lat)
-            elevation = sun_position['altitude'] * 180 / np.pi
+            elevation = calc_sun(lat, lon, selected_time)
 
             self.slider_label.config(
-                text=f"Selected time: {selected_hour:2d}:{selected_min:2d}        "
+                text=f"Selected time: {selected_hour:2d}:{selected_min:2d} UTC       "
                      f"Sun Elevation: {elevation:.2f}" + chr(176))
-            self.sun_label.place(x=self.slider.get() / 24 / 60 * ((self.win_x - 100) * 0.4), y=32)
+
+            # if Sun icon moves not correctly change 250 on 200 or 300 and see what will change
+            self.sun_label.place(x=self.slider.get() / 24 / 60 * ((self.win_x - 250) * 0.4), y=32)
         except:
             pass
 
     def slide_left(self, event):
+        """
+        process case when user click left arrow
+        """
         current_value = self.slider.get()
         if current_value > 0:
-            self.slider.set(current_value - 5)
+            self.slider.set(current_value - 5)  # main time step is 5 minutes
             self.update_elevation(event)
 
     def slide_right(self, event):
+        """
+        process case when user click right arrow
+        """
         current_value = self.slider.get()
         if current_value < 24 * 60:
-            self.slider.set(current_value + 5)
+            self.slider.set(current_value + 5)  # main time step is 5 minutes
             self.update_elevation(event)
 
     def click_update_tle(self):
+        """
+        updating tle/tle_data.txt file from data from links in tle/tle_sites.txt file
+        while updating temporary file tle_data_tmp.txt creating for saving backup previous data
+        """
 
         len = sum(1 for line in open(path_to_af + 'tle/tle_sites.txt', 'r'))  # number of satellites
         data = open(path_to_af + 'tle/tle_data_tmp.txt', 'w')  # file with previous TLE data
-        time = datetime.utcnow().strftime("%d.%m.%Y %H:%M:%S")  # current time to record
+        time = dt.utcnow().strftime("%d.%m.%Y %H:%M:%S")  # current time to record
         data.write("# last update : " + time + " UTC\n")
 
         with open(path_to_af + 'tle/tle_sites.txt', 'r') as file:  # reading sites from file with links
@@ -246,6 +260,8 @@ class MainWindow:
                     f = requests.get(line)
 
                 except requests.exceptions.RequestException as e:
+
+                    # if error caught previous data saves and shows an error
 
                     if str(e)[:2] == 'No':
                         messagebox.showerror(title="AltiFore: Upload TLE error",
@@ -256,8 +272,7 @@ class MainWindow:
                                              message="Check your internet connection! If the error remains, "
                                                      "write on ezhova.ea@phystech.edu")
 
-                    self.sty.configure("LabeledProgressbar",
-                                       text="TLE wasn't updated =(")
+                    self.sty.configure("LabeledProgressbar", text="TLE wasn't updated =(")
                     self.root.update()
                     data.close()
                     move(path_to_af + 'tle/tle_data_tmp.txt', path_to_af + 'tle/tle_data.txt')
@@ -270,11 +285,14 @@ class MainWindow:
                 self.root.update()
 
         data.close()
-        move(path_to_af + 'tle/tle_data_tmp.txt', path_to_af + 'tle/tle_data.txt')
+        move(path_to_af + 'tle/tle_data_tmp.txt', path_to_af + 'tle/tle_data.txt')  # replace old file by new
         self.sty.configure("LabeledProgressbar", text="Last update of TLE : " + time + " UTC")  # update text on bar
         self.root.update()
 
     def click_select(self):
+        """
+        process case when user click "Select file!" button
+        """
         global once_sel
 
         if not once_sel:
@@ -284,10 +302,10 @@ class MainWindow:
         ftypes = (('OpenCPN files', '*.kml'), ('All files', '*.*'))
         self.fname = fd.askopenfilename(title='Select a file', initialdir=__file__, filetypes=ftypes)
 
-        short_name = self.fname.rsplit('/', 1)[-1]
+        short_name = self.fname.rsplit('/', 1)[-1]  # only file name for displaying
         ttk.Label(self.select_frame_up, text=short_name).pack(side='left', padx=10)
 
-        if once_sel:
+        if once_sel:  # currently we do not re-process data, app should be restarted
             once_sel = False
             ttk.Label(self.select_frame_down, text='Average speed').pack(side='left', padx=5)
             self.speed_entry = ttk.Entry(self.select_frame_down, width=4)
@@ -298,17 +316,22 @@ class MainWindow:
             self.date_entry = ttk.Entry(self.select_frame_down, width=10)
             self.date_entry.insert(0, "dd/mm/yy")
             self.date_entry.pack(side='left')
+
             ttk.Label(self.select_frame_down, text='Time').pack(side='left', padx=5)
             self.time_entry = ttk.Entry(self.select_frame_down, width=6)
             self.time_entry.insert(0, "hh:mm")
             self.time_entry.pack(side='left')
+
             ttk.Button(self.select_frame_up, text="Calculate file!", command=self.click_calc_file).pack(side='right',
                                                                                                         padx=5)
 
     def click_tab(self):
+        """
+        process case when user click "Calculate table!" button
+        """
         global once_cal
 
-        if not once_cal:
+        if not once_cal:  # currently we do not re-process data, app should be restarted
             messagebox.showerror("AltiFore Error", "For new prognosis restart a program!")
             return 0
 
@@ -324,8 +347,8 @@ class MainWindow:
 
             for i in range(len(self.entry_arr[0])):
                 try:
-                    datetimes.append(datetime.strptime(self.entry_arr[0][i].get() + " " + self.entry_arr[1][i].get(),
-                                                       '%d/%m/%y %H:%M').replace(tzinfo=utc))
+                    datetimes.append(dt.strptime(self.entry_arr[0][i].get() + " " + self.entry_arr[1][i].get(),
+                                                 '%d/%m/%y %H:%M').replace(tzinfo=utc))
                 except ValueError:
                     messagebox.showerror("AltiFore: Enter Error", "Check date or time in " + str(i) + "th row!")
                     return 0
@@ -361,10 +384,12 @@ class MainWindow:
                 self.draw_map()
 
     def click_calc_file(self):
-
+        """
+        process case when user click "Calculate file!" button
+        """
         global once_cal
 
-        if not once_cal:
+        if not once_cal:  # currently we do not re-process data, app should be restarted
             messagebox.showerror("AltiFore Error", "For new prognosis restart a program!")
             return 0
 
@@ -377,8 +402,8 @@ class MainWindow:
                 return 0
 
             try:
-                self.start_date = datetime.strptime(self.date_entry.get() + " " + self.time_entry.get(),
-                                                    '%d/%m/%y %H:%M').replace(tzinfo=utc)
+                self.start_date = dt.strptime(self.date_entry.get() + " " + self.time_entry.get(),
+                                              '%d/%m/%y %H:%M').replace(tzinfo=utc)
             except ValueError:
                 messagebox.showerror('Altifore: Enter error', 'Check start date and time fields!')
                 return 0
@@ -398,6 +423,9 @@ class MainWindow:
             self.draw_map()
 
     def add_row_to_column(self):
+        """
+        add a new row of entries to the bottom of table
+        """
         for col in range(4):
             en = ttk.Entry(self.line_frames[col], width=int(self.win_x * 0.006))
 
@@ -408,24 +436,31 @@ class MainWindow:
             self.entry_arr[col].append(en)
 
     def remove_row_from_column(self):
+        """
+        remove a last row of entries from the bottom of table
+        """
         for col in range(4):
             if self.entry_arr[col]:
                 last_row = self.entry_arr[col].pop()
                 last_row.destroy()
 
     def draw_map(self):
-
+        """
+        drawing a map
+        """
         self.fig = plt.figure(figsize=(5, 5), dpi=400)
         self.ax = self.fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
 
+        # limits
         lat_min = int(np.min(self.tr_lat)) - 5
         lat_max = int(np.max(self.tr_lat)) + 5
         lon_min = int(np.min(self.tr_lon)) - 5
         lon_max = int(np.max(self.tr_lon)) + 5
+        self.ax.set_extent([lon_min, lon_max, lat_min, lat_max])
 
+        # tick steps
         step_lon = (lon_max - lon_min) / 10.
         step_lat = (lat_max - lat_min) / 10.
-
         if step_lat > 1.: step_lat = round(step_lat)
         if step_lon > 1.: step_lon = round(step_lon)
 
@@ -447,8 +482,6 @@ class MainWindow:
         gl.yformatter = LATITUDE_FORMATTER
         gl.xlabel_style = {'size': 4}
         gl.ylabel_style = {'size': 4}
-
-        self.ax.set_extent([lon_min, lon_max, lat_min, lat_max])
 
         self.col_scat = [colors[int(s)] for s in self.draw_arr[:, 2]]
         self.col_loc = ['black' for s in self.tr_lat]
@@ -475,8 +508,10 @@ class MainWindow:
         self.canvas.mpl_connect('motion_notify_event', self.display_coords)
 
     def display_coords(self, event):
+        """
+        displaying coordinates of cursor or the flight, drawing circle around chosen point
+        """
         x, y = event.xdata, event.ydata
-
         message = None
 
         if x is not None and y is not None:
@@ -497,21 +532,24 @@ class MainWindow:
                 message = f"{SAT_NAMES[int(self.draw_arr[arg, 2])]} : " + fl_time + coords + f", Dist = {self.draw_arr[arg, 3]} km"
 
                 if self.circ.center[0] != self.draw_arr[arg, -2] and self.circ.center[1] != self.draw_arr[arg, -3]:
+                    # updating place of circle
                     self.circ.center = self.draw_arr[arg, -2], self.draw_arr[arg, -3]
                     self.circ.radius = self.draw_arr[arg, 3] / 111. / np.cos(self.draw_arr[arg, -3] / 180. * np.pi)
                     self.col_loc = ['black' for s in self.tr_lat]
                     self.col_loc[int(self.draw_arr[arg, -1])] = 'aqua'
 
             else:
+                # removing circle and colorful points
                 self.col_loc = ['black' for s in self.tr_lat]
                 self.circ.center = 0, -89.9
 
             self.scat_loc.remove()
+            # updating a color of track points
             self.scat_loc = self.ax.scatter(self.tr_lon, self.tr_lat, label='Input locations', zorder=10, marker='+',
                                             color=self.col_loc, s=5)
             self.canvas.draw()
 
-            if message is None:
+            if message is None:  # if we far from any flight display cursor coordinates
                 d_lat = round(np.fix(y))
                 m_lat = int((y - d_lat) * 60 * np.sign(y))
                 d_lon = round(np.fix(x))
