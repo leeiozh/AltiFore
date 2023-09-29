@@ -90,9 +90,9 @@ def calc(distance, lats, lons, times, save_name):
 
                         if t == res_sat[0][1]:  # save only central point of flight where sat the closest to us
                             res_list[n].append(
-                                {'sat_name': SAT_NAMES[i], 'date': t.utc_datetime().date().strftime("%Y-%m-%d"),
+                                {'sat_name': SAT_NAMES[i], 'date': t.utc_datetime().date().strftime("%d-%m-%Y"),
                                  'time': t.utc_datetime().time().strftime("%H:%M"),
-                                 'dist': round(dist_km, 2), 'color': color_rgd[i]})
+                                 'dist': round(dist_km, 2), 'color': color_rgd[i], 'lat': lats[n], 'lon': lons[n]})
 
                             ofile.write(str(SAT_NAMES[i]) + " ")
                             ofile.write(
@@ -130,8 +130,11 @@ def calc_sun(latitude, longitude, date):
     hour_minute = (hour + minute / 60)
     day_of_year = date[7]
 
-    g = (360 / 365.25) * (day_of_year + hour_minute / 24)
+    return calc_sun_(latitude, longitude, day_of_year, hour_minute)
 
+
+def calc_sun_(latitude, longitude, day_of_year, hour_minute):
+    g = (360 / 365.25) * (day_of_year + hour_minute / 24)
     g_rad = math.radians(g)
     decl = 0.396372 - 22.91327 * math.cos(g_rad) + 4.02543 * math.sin(g_rad) - 0.387205 * math.cos(2 * g_rad) \
            + 0.051967 * math.sin(2 * g_rad) - 0.154527 * math.cos(3 * g_rad) + 0.084798 * math.sin(3 * g_rad)
@@ -145,3 +148,21 @@ def calc_sun(latitude, longitude, date):
     SZA_rad = math.acos(math.sin(lat_rad) * math.sin(d_rad) + math.cos(lat_rad) * math.cos(d_rad) * math.cos(SHA_rad))
 
     return 90 - math.degrees(SZA_rad)
+
+
+def calc_sunset_sunrise(latitude, longitude, day_of_year):
+    hour_minute = np.linspace(0, 24, 24 * 60)
+
+    func = np.vectorize(calc_sun_)
+    elev = func(latitude, longitude, day_of_year, hour_minute)
+
+    if np.all(elev > 0):
+        return -1, 1
+    elif np.all(elev < 0):
+        return -1, -1
+    else:
+        rise = np.argmax(elev > 0)
+        elev = elev[::-1]
+        set = np.argmax(elev < 0) / hour_minute.shape[0] * 24
+
+    return rise / hour_minute.shape[0] * 24, set

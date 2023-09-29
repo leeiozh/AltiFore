@@ -210,6 +210,7 @@ class MainWindow:
         """
         updating elevation of Sun when user clicks on left or right arrow or on slider
         """
+
         selected_hour = int(self.slider.get() / 60)
         selected_min = int(self.slider.get() - 60 * selected_hour)
 
@@ -235,6 +236,7 @@ class MainWindow:
 
             # if Sun icon moves not correctly change 250 on 200 or 300 and see what will change
             self.sun_label.place(x=self.slider.get() / 24 / 60 * ((self.win_x - 250) * 0.4), y=32)
+
         except:
             pass
 
@@ -508,10 +510,10 @@ class MainWindow:
 
         self.col_scat = [colors[int(s)] for s in self.draw_arr[:, 2]]
         self.col_loc = ['black' for s in self.tr_lat]
-        self.sat_scat = self.ax.scatter(self.draw_arr[:, 0], self.draw_arr[:, 1], color=self.col_scat, s=10, zorder=10)
+        self.sat_scat = self.ax.scatter(self.draw_arr[:, 0], self.draw_arr[:, 1], color=self.col_scat, s=5, zorder=10)
 
         for i in range(0, self.draw_arr[:, 0].shape[0], 3):
-            self.ax.plot(self.draw_arr[i:i + 3, 0], self.draw_arr[i:i + 3, 1], color=self.col_scat[i], zorder=10)
+            self.ax.plot(self.draw_arr[i:i + 3, 0], self.draw_arr[i:i + 3, 1], color=self.col_scat[i], lw = 1, zorder=10)
 
         self.scat_loc = self.ax.scatter(self.tr_lon, self.tr_lat, label='Input locations', zorder=10, marker='+',
                                         color=self.col_loc, s=5)

@@ -2,6 +2,7 @@ import openpyxl  # conda install -c conda-forge openpyxl
 from openpyxl.styles import PatternFill
 import pandas as pd  # conda install -c conda-forge pandas
 import datetime as dt
+from calculator import calc_sunset_sunrise
 
 
 def convert_list(name, sheet, res_list):
@@ -9,6 +10,11 @@ def convert_list(name, sheet, res_list):
     while len(res_list[st]) == 0:
         st += 1
     curr_date = res_list[st][0]['date']
+    num_day = dt.datetime.strptime(res_list[st][0]['date'], "%d-%m-%Y").timetuple()[7]
+    sr, ss = calc_sunset_sunrise(res_list[st][0]['lat'], res_list[st][0]['lon'], num_day)
+    sr, ss = sr_ss(sr, ss)
+    sheet.loc[sheet['date'] == curr_date, "sunrise"] = sr
+    sheet.loc[sheet['date'] == curr_date, "sunset"] = ss
 
     curr_flight = 0
     for i in range(st, len(res_list)):
@@ -16,6 +22,13 @@ def convert_list(name, sheet, res_list):
             if curr_date != res_list[i][0]['date']:
                 curr_date = res_list[i][0]['date']
                 curr_flight = 0
+
+                num_day = dt.datetime.strptime(res_list[i][0]['date'], "%d-%m-%Y").timetuple()[7]
+                sr, ss = calc_sunset_sunrise(res_list[i][0]['lat'], res_list[i][0]['lon'], num_day)
+                sr, ss = sr_ss(sr, ss)
+                sheet.loc[sheet['date'] == curr_date, "sunrise"] = sr
+                sheet.loc[sheet['date'] == curr_date, "sunset"] = ss
+
             for j in range(len(res_list[i])):
                 curr_flight += 1
                 sheet.loc[sheet['date'] == curr_date, f"flight {curr_flight}"] = res_list[i][j]['time']
@@ -26,14 +39,14 @@ def convert_list(name, sheet, res_list):
     ws = wb['Sheet1']
     alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q']
 
-    letter = 0
+    letter = 2
     try:
         row = (sheet.index[sheet['date'] == curr_date][0]) + 2
         for i in range(len(res_list)):
             if len(res_list[i]) != 0:
                 if curr_date != res_list[i][0]['date']:
                     curr_date = res_list[i][0]['date']
-                    letter = 0
+                    letter = 2
                     row = (sheet.index[sheet['date'] == curr_date][0]) + 2
 
                 for res_it in res_list[i]:
@@ -47,8 +60,39 @@ def convert_list(name, sheet, res_list):
 
 
 def prepare_sheet(start, nums):
-    res = pd.DataFrame(columns=['date', 'flight 1', 'flight 2', 'flight 3', 'flight 4', 'flight 5', 'flight 6',
-                                'flight 7', 'flight 8', 'flight 9', 'flight 10', 'flight 11', 'flight 12',
-                                'flight 13', 'flight 14', 'flight 15', 'flight 16'])
-    res['date'] = [(start + dt.timedelta(days=i)).strftime("%Y-%m-%d") for i in range(nums)]
+    res = pd.DataFrame(
+        columns=['date', 'sunrise', 'sunset', 'flight 1', 'flight 2', 'flight 3', 'flight 4', 'flight 5', 'flight 6',
+                 'flight 7', 'flight 8', 'flight 9', 'flight 10', 'flight 11', 'flight 12',
+                 'flight 13', 'flight 14', 'flight 15', 'flight 16'])
+    res['date'] = [(start + dt.timedelta(days=i)).strftime("%d-%m-%Y") for i in range(nums)]
     return res
+
+
+def sr_ss(sr, ss):
+    if sr == -1:
+        if ss == 1:
+            return "PD", "PD"
+        else:
+            return "PN", "PN"
+    else:
+        sr_h = int(sr)
+        sr_m = int(60 * (sr - sr_h))
+        if sr_h < 10:
+            sr_h = "0" + str(sr_h)
+        else:
+            sr_h = str(sr_h)
+        if sr_m < 10:
+            sr_m = "0" + str(sr_m)
+        else:
+            sr_m = str(sr_m)
+        ss_h = int(ss)
+        ss_m = int(60 * (ss - ss_h))
+        if ss_h < 10:
+            ss_h = "0" + str(ss_h)
+        else:
+            ss_h = str(ss_h)
+        if ss_m < 10:
+            ss_m = "0" + str(ss_m)
+        else:
+            ss_m = str(ss_m)
+    return sr_h + ":" + sr_m, ss_h + ":" + ss_m
