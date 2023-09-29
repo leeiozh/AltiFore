@@ -39,12 +39,17 @@ def calc_alt(distance):
     return 90 - (phi + alph) / np.pi * 180.
 
 
-def calc(distance, lats, lons, times):
+def calc(distance, lats, lons, times, save_name):
     """
     main calculation
     :return: list fir table creating and array for drawing
     """
-    ofile = open(path_to_af + "test.txt", "w")  # output file
+    path_to_save = save_name.get()
+    try:
+        ofile = open(path_to_save + ".txt", "w")  # output file
+    except:
+        return -1
+
     sats = load.tle_file(path_to_af + 'tle/tle_data.txt')
 
     try:
@@ -101,7 +106,7 @@ def calc(distance, lats, lons, times):
     return res_list, np.array(arr_for_draw)
 
 
-def calc_from_file(name, distance, start_date, speed):
+def calc_from_file(name, distance, start_date, speed, save_name):
     # reading kml file
     fiona.drvsupport.supported_drivers['KML'] = 'rw'
     geo_df = gpd.read_file(name, driver='KML')
@@ -112,7 +117,7 @@ def calc_from_file(name, distance, start_date, speed):
     lat = [track_df[i].y for i in range(track_df.shape[0] - 1)]
     lon = [track_df[i].x for i in range(track_df.shape[0] - 1)]
 
-    return calc(distance, lat, lon, track_time), track_time[-1], lat, lon
+    return calc(distance, lat, lon, track_time, save_name), track_time[-1], lat, lon
 
 
 def calc_sun(latitude, longitude, date):

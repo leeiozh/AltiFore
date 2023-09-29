@@ -53,7 +53,8 @@ class MainWindow:
         self.right_frame.pack_propagate(False)
 
         ### frame for sun at the top of right_frame ###
-        self.sun_frame = tk.Frame(self.right_frame)
+        self.sun_frame = tk.Frame(self.right_frame, highlightbackground="orange", highlightcolor="orange",
+                                  highlightthickness=2)
         self.sun_frame.pack(side='top', pady=20)
         self.sun_frame_left = tk.Frame(self.sun_frame)
         self.sun_frame_left.pack(side='left', padx=5)
@@ -105,12 +106,12 @@ class MainWindow:
         self.tooltip_label.pack(side='bottom')
 
         ### frame for TLE progress bar and update button ###
-        self.tle_frame = tk.Frame(self.left_frame)
-        self.tle_frame.pack(side='top', pady=10)
+        self.tle_frame = tk.Frame(self.left_frame, highlightbackground="black", highlightthickness=2)
+        self.tle_frame.pack(side='top', pady=20)
 
         ### subframe for progress bar ###
         self.bar_frame = tk.Frame(self.tle_frame)
-        self.bar_frame.pack(side='left', pady=10, padx=5)
+        self.bar_frame.pack(side='left', pady=20, padx=5)
         self.sty = ttk.Style(self.root)
         self.sty.layout("LabeledProgressbar", [('LabeledProgressbar.trough', {
             'children': [('LabeledProgressbar.pbar', {'side': 'left', 'sticky': 'ns'}),
@@ -123,46 +124,57 @@ class MainWindow:
 
         ### subframe update TLE button ###
         self.but_tle_frame = tk.Frame(self.tle_frame)
-        self.but_tle_frame.pack(side='right', padx=5, pady=10)
+        self.but_tle_frame.pack(side='right', padx=5, pady=20)
         self.but_tle_up = tk.Button(self.but_tle_frame, text='Update TLE!', command=self.click_update_tle, width=10)
         self.but_tle_up.pack()
 
         ### frame for distance entry ###
         self.dist_frame = tk.Frame(self.left_frame)
-        self.dist_frame.pack(side='top', padx=5)
+        self.dist_frame.pack(side='top', padx=5, pady=20)
         ttk.Label(self.dist_frame, text="Distance between vessel and satellite tracks ").pack(side='left')
         self.km_entry = ttk.Entry(self.dist_frame, width=5)
         self.km_entry.insert(0, "200")
         self.km_entry.pack(side='left')
         ttk.Label(self.dist_frame, text="km").pack(side='left')
 
+        ttk.Label(self.left_frame, text="Name for saving files (without extension) ").pack(side='top')
+        self.save_name = ttk.Entry(self.left_frame, width=int(self.win_x * 0.025))
+        self.save_name.insert(0, app_dir + "forecast_" + dt.utcnow().date().strftime("%d%m%Y"))
+        self.save_name.pack(side='top', pady=10)
+
         ### frame for selecting a file ###
-        self.select_frame = tk.Frame(self.left_frame)
-        self.select_frame.pack(side='top', padx=5, pady=10)
+        self.select_frame = tk.Frame(self.left_frame, highlightbackground="cyan", highlightcolor="cyan",
+                                     highlightthickness=2)
+        self.select_frame.pack(side='top', padx=10, pady=10)
 
         ### subframe for buttons and path ###
         self.select_frame_up = ttk.Frame(self.select_frame)
         self.select_frame_up.pack(side='top', pady=10)
-        self.but_select = ttk.Button(self.select_frame_up, text='Select a file', command=self.click_select)
+        self.but_select = tk.Button(self.select_frame_up, text='Select a file', command=self.click_select)
         self.but_select.pack(side='left')
 
         ### subframe for speed and start_date entries ###
         self.select_frame_down = ttk.Frame(self.select_frame)
         self.select_frame_down.pack(side='top', pady=5)
 
+        self.frame_green = ttk.Frame(self.left_frame)
+        self.frame_green.pack(side='top')
+
         ### frame for tabular button ###
-        self.add_frame = ttk.Frame(self.left_frame)
+        self.add_frame = tk.Frame(self.frame_green, highlightbackground="LawnGreen", highlightcolor="LawnGreen",
+                                  highlightthickness=2)
         self.add_frame.pack(side='top', pady=10)
 
         self.add_row_button = tk.Button(self.add_frame, text="Add new row", command=self.add_row_to_column)
         self.add_row_button.pack(pady=10, side='left', padx=5)
-        self.calc_table_button = tk.Button(self.add_frame, text="Calculate table!", command=self.click_tab)
+        self.calc_table_button = tk.Button(self.add_frame, text="Calculate from table!", command=self.click_tab,
+                                           bg='LawnGreen')
         self.calc_table_button.pack(pady=10, side='left', padx=5)
         self.rem_row_button = tk.Button(self.add_frame, text="Remove last row", command=self.remove_row_from_column)
         self.rem_row_button.pack(pady=10, side='right', padx=5)
 
         ### frame for tabular ###
-        self.table_frame = ttk.Frame(self.left_frame)
+        self.table_frame = ttk.Frame(self.frame_green)
         self.table_frame.pack(side='top')
 
         ### subframes for tabular ###
@@ -179,6 +191,7 @@ class MainWindow:
         self.fig = None  # map figure
         self.ax = None  # map axes
         self.fname = None  # name of kml file
+        self.fname_lab = None  # text in label with selected file name
         self.speed_entry = None  # entry of rv speed
         self.date_entry = None  # entry of start date
         self.time_entry = None  # entry of start time
@@ -295,18 +308,18 @@ class MainWindow:
         """
         global once_sel
 
-        if not once_sel:
-            messagebox.showerror("AltiFore Error", "For new prognosis restart a program!")
-            return 0
-
         ftypes = (('OpenCPN files', '*.kml'), ('All files', '*.*'))
         self.fname = fd.askopenfilename(title='Select a file', initialdir=__file__, filetypes=ftypes)
 
         short_name = self.fname.rsplit('/', 1)[-1]  # only file name for displaying
-        ttk.Label(self.select_frame_up, text=short_name).pack(side='left', padx=10)
+        if once_sel:
+            self.fname_lab = ttk.Label(self.select_frame_up, text=short_name)
+            self.fname_lab.pack(side='left', padx=10)
+        else:
+            self.fname_lab.config(text=short_name)
 
         if once_sel:  # currently we do not re-process data, app should be restarted
-            once_sel = False
+
             ttk.Label(self.select_frame_down, text='Average speed').pack(side='left', padx=5)
             self.speed_entry = ttk.Entry(self.select_frame_down, width=4)
             self.speed_entry.pack(side='left')
@@ -322,105 +335,115 @@ class MainWindow:
             self.time_entry.insert(0, "hh:mm")
             self.time_entry.pack(side='left')
 
-            ttk.Button(self.select_frame_up, text="Calculate file!", command=self.click_calc_file).pack(side='right',
-                                                                                                        padx=5)
+            tk.Button(self.select_frame_up, text="Calculate from file!", command=self.click_calc_file, bg='cyan').pack(
+                side='right', padx=5)
+            once_sel = False
 
     def click_tab(self):
         """
-        process case when user click "Calculate table!" button
+        process case when user click "Calculate from table!" button
         """
         global once_cal
 
-        if not once_cal:  # currently we do not re-process data, app should be restarted
-            messagebox.showerror("AltiFore Error", "For new prognosis restart a program!")
-            return 0
-
+        if not once_cal:
+            self.reboot_map()
         else:
             once_cal = False
+
+        self.tr_lat = []
+        self.tr_lon = []
+        try:
+            self.distance = float(self.km_entry.get())
+        except ValueError:
+            messagebox.showerror('Altifore: Enter error', 'Check distance field!')
+            return 0
+
+        datetimes = []
+
+        for i in range(len(self.entry_arr[0])):
             try:
-                self.distance = float(self.km_entry.get())
+                datetimes.append(dt.strptime(self.entry_arr[0][i].get() + " " + self.entry_arr[1][i].get(),
+                                             '%d/%m/%y %H:%M').replace(tzinfo=utc))
             except ValueError:
-                messagebox.showerror('Altifore: Enter error', 'Check distance field!')
+                messagebox.showerror("AltiFore: Enter Error", "Check date or time in " + str(i + 1) + "th row!")
                 return 0
 
-            datetimes = []
+            try:
+                lat_str = list(map(int, self.entry_arr[2][i].get().split()))
+                self.tr_lat.append(
+                    np.sign(lat_str[0]) * (np.abs(lat_str[0]) + (lat_str[1] + lat_str[2] / 60.) / 60.))
+            except ValueError:
+                messagebox.showerror("AltiFore: Enter Error", "Check latitude in " + str(i + 1) + "th row!")
+                return 0
 
-            for i in range(len(self.entry_arr[0])):
-                try:
-                    datetimes.append(dt.strptime(self.entry_arr[0][i].get() + " " + self.entry_arr[1][i].get(),
-                                                 '%d/%m/%y %H:%M').replace(tzinfo=utc))
-                except ValueError:
-                    messagebox.showerror("AltiFore: Enter Error", "Check date or time in " + str(i) + "th row!")
-                    return 0
+            try:
+                lon_str = list(map(int, self.entry_arr[3][i].get().split()))
+                self.tr_lon.append(
+                    np.sign(lon_str[0]) * (np.abs(lon_str[0]) + (lon_str[1] + lon_str[2] / 60.) / 60.))
+            except ValueError:
+                messagebox.showerror("AltiFore: Enter Error", "Check longitude in " + str(i + 1) + "th row!")
+                return 0
 
-                try:
-                    lat_str = list(map(int, self.entry_arr[2][i].get().split()))
-                    self.tr_lat.append(
-                        np.sign(lat_str[0]) * (np.abs(lat_str[0]) + (lat_str[1] + lat_str[2] / 60.) / 60.))
-                except ValueError:
-                    messagebox.showerror("AltiFore: Enter Error", "Check latitude in " + str(i) + "th row!")
-                    return 0
+        self.res_list, self.draw_arr = calc(self.distance, self.tr_lat, self.tr_lon, datetimes, self.save_name)
+        self.start_date = datetimes[0]
 
-                try:
-                    lon_str = list(map(int, self.entry_arr[3][i].get().split()))
-                    self.tr_lon.append(
-                        np.sign(lon_str[0]) * (np.abs(lon_str[0]) + (lon_str[1] + lon_str[2] / 60.) / 60.))
-                except ValueError:
-                    messagebox.showerror("AltiFore: Enter Error", "Check longitude in " + str(i) + "th row!")
-                    return 0
+        if len(self.draw_arr) == 0:
+            messagebox.showwarning("AltiFore: Calculation Warning", "No flights for entered data :(")
+            self.tr_lat = []
+            self.tr_lon = []
 
-            self.res_list, self.draw_arr = calc(self.distance, self.tr_lat, self.tr_lon, datetimes)
-            self.start_date = datetimes[0]
-
-            if len(self.draw_arr) == 0:
-                messagebox.showwarning("AltiFore: Calculation Warning", "No flights for entered data :(")
-                self.tr_lat = []
-                self.tr_lon = []
-
-            else:
-                num_of_days = (datetimes[-1] - datetimes[0]).days + 1
-                res_sheet = prepare_sheet(datetimes[0], num_of_days)
-                convert_list(path_to_af + "test.xlsx", res_sheet, self.res_list)
-                self.draw_map()
+        else:
+            num_of_days = (datetimes[-1] - datetimes[0]).days + 1
+            res_sheet = prepare_sheet(datetimes[0], num_of_days)
+            path_to_save = self.save_name.get()
+            try:
+                convert_list(path_to_save + ".xlsx", res_sheet, self.res_list)
+            except:
+                messagebox.showerror("AltiFore: Saving Error", "Check entered path to saving!")
+            self.draw_map()
 
     def click_calc_file(self):
         """
-        process case when user click "Calculate file!" button
+        process case when user click "Calculate from file!" button
         """
         global once_cal
 
-        if not once_cal:  # currently we do not re-process data, app should be restarted
-            messagebox.showerror("AltiFore Error", "For new prognosis restart a program!")
-            return 0
-
+        if not once_cal:
+            self.reboot_map()
         else:
             once_cal = False
-            try:
-                speed = float(self.speed_entry.get())
-            except ValueError:
-                messagebox.showerror('Altifore: Enter error', 'Check speed field!')
-                return 0
 
-            try:
-                self.start_date = dt.strptime(self.date_entry.get() + " " + self.time_entry.get(),
-                                              '%d/%m/%y %H:%M').replace(tzinfo=utc)
-            except ValueError:
-                messagebox.showerror('Altifore: Enter error', 'Check start date and time fields!')
-                return 0
+        try:
+            speed = float(self.speed_entry.get())
+        except ValueError:
+            messagebox.showerror('Altifore: Enter error', 'Check speed field!')
+            return 0
 
-            try:
-                self.distance = float(self.km_entry.get())
-            except ValueError:
-                messagebox.showerror('Altifore: Enter error', 'Check distance field!')
-                return 0
+        try:
+            self.start_date = dt.strptime(self.date_entry.get() + " " + self.time_entry.get(),
+                                          '%d/%m/%y %H:%M').replace(tzinfo=utc)
+        except ValueError:
+            messagebox.showerror('Altifore: Enter error', 'Check start date and time fields!')
+            return 0
 
-            (self.res_list, self.draw_arr), last_date, self.tr_lat, self.tr_lon = calc_from_file(self.fname,
-                                                                                                 self.distance,
-                                                                                                 self.start_date, speed)
-            num_of_days = (last_date - self.start_date).days + 2
-            res_sheet = prepare_sheet(self.start_date, num_of_days)
-            convert_list(path_to_af + "test.xlsx", res_sheet, self.res_list)
-            self.draw_map()
+        try:
+            self.distance = float(self.km_entry.get())
+        except ValueError:
+            messagebox.showerror('Altifore: Enter error', 'Check distance field!')
+            return 0
+
+        (self.res_list, self.draw_arr), last_date, self.tr_lat, self.tr_lon = calc_from_file(self.fname,
+                                                                                             self.distance,
+                                                                                             self.start_date, speed,
+                                                                                             self.save_name)
+        num_of_days = (last_date - self.start_date).days + 2
+        res_sheet = prepare_sheet(self.start_date, num_of_days)
+        path_to_save = self.save_name.get()
+        try:
+            convert_list(path_to_save + ".xlsx", res_sheet, self.res_list)
+        except:
+            messagebox.showerror("AltiFore: Saving Error", "Check entered path to saving!")
+        self.draw_map()
 
     def add_row_to_column(self):
         """
@@ -486,6 +509,10 @@ class MainWindow:
         self.col_scat = [colors[int(s)] for s in self.draw_arr[:, 2]]
         self.col_loc = ['black' for s in self.tr_lat]
         self.sat_scat = self.ax.scatter(self.draw_arr[:, 0], self.draw_arr[:, 1], color=self.col_scat, s=10, zorder=10)
+
+        for i in range(0, self.draw_arr[:, 0].shape[0], 3):
+            self.ax.plot(self.draw_arr[i:i + 3, 0], self.draw_arr[i:i + 3, 1], color=self.col_scat[i], zorder=10)
+
         self.scat_loc = self.ax.scatter(self.tr_lon, self.tr_lat, label='Input locations', zorder=10, marker='+',
                                         color=self.col_loc, s=5)
         self.circ = Circle((0, -89.9), self.distance / 111., fill=False, color='aqua', transform=ccrs.PlateCarree())
@@ -494,7 +521,12 @@ class MainWindow:
         for i in range(len(SAT_NAMES)):
             plt.scatter([0], [-89.9], color=colors[i], label=SAT_NAMES[i])
         plt.legend(loc='best', fontsize="4")
-        plt.savefig(path_to_af + "test.png", dpi=600, bbox_inches='tight')
+        path_to_save = self.save_name.get()
+        try:
+            plt.savefig(path_to_save + ".png", dpi=600, bbox_inches='tight')
+        except:
+            messagebox.showerror("AltiFore: Saving Error", "Check entered path to saving!")
+
         self.fig.tight_layout(h_pad=10, w_pad=10)
 
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.map_frame)
@@ -506,6 +538,20 @@ class MainWindow:
 
         self.canvas_widget.pack(side='top')
         self.canvas.mpl_connect('motion_notify_event', self.display_coords)
+
+    def reboot_map(self):
+        if self.fig:
+            self.fig.clf()  # map figure
+        self.ax = None  # map axes
+        if self.toolbar:
+            self.toolbar.destroy()  # map toolbar
+        if self.canvas:
+            self.canvas.get_tk_widget().pack_forget()  # canvas for map
+        self.col_loc = None  # color location for circle
+        self.scat_loc = None  # scatter location for circle
+        self.col_scat = None  # color of scatter for circle
+        self.sat_scat = None  # sat of scatter for circle
+        self.circ = None  # circle around current highlight point
 
     def display_coords(self, event):
         """

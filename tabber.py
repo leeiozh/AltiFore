@@ -27,17 +27,21 @@ def convert_list(name, sheet, res_list):
     alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q']
 
     letter = 0
-    row = (sheet.index[sheet['date'] == curr_date][0]) + 2
-    for i in range(len(res_list)):
-        if len(res_list[i]) != 0:
-            if curr_date != res_list[i][0]['date']:
-                curr_date = res_list[i][0]['date']
-                letter = 0
-                row = (sheet.index[sheet['date'] == curr_date][0]) + 2
+    try:
+        row = (sheet.index[sheet['date'] == curr_date][0]) + 2
+        for i in range(len(res_list)):
+            if len(res_list[i]) != 0:
+                if curr_date != res_list[i][0]['date']:
+                    curr_date = res_list[i][0]['date']
+                    letter = 0
+                    row = (sheet.index[sheet['date'] == curr_date][0]) + 2
 
-            for res_it in res_list[i]:
-                letter += 1
-                ws[str(alphabet[letter] + str(row))].fill = PatternFill(patternType='solid', fgColor=res_it['color'])
+                for res_it in res_list[i]:
+                    letter += 1
+                    ws[str(alphabet[letter] + str(row))].fill = PatternFill(patternType='solid',
+                                                                            fgColor=res_it['color'])
+    except:
+        pass
 
     wb.save(name)
 
