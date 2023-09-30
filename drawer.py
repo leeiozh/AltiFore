@@ -66,12 +66,12 @@ class MainWindow:
         self.sun_frame_right.pack(side='right', padx=5)
         self.map_frame = tk.Frame(self.right_frame)
         self.map_frame.pack(side='top', expand=True, fill='both')
-        ttk.Label(self.sun_frame_left_up, text="Your date ").pack(side='left')
+        ttk.Label(self.sun_frame_left_up, text="Your date ").pack(side='left', pady=10)
         self.dat_entry = ttk.Entry(self.sun_frame_left_up, width=10)
         sup_date = dt.utcnow().date().strftime("%d/%m/%Y")
         self.dat_entry.insert(0, sup_date)
         self.dat_entry.pack(side='left', padx=10)
-        ttk.Label(self.sun_frame_left_down, text="Your latitude ").pack(side='left')
+        ttk.Label(self.sun_frame_left_down, text="Your latitude ").pack(side='left', pady=10)
         self.lat_entry = ttk.Entry(self.sun_frame_left_down, width=10)
         self.lat_entry.insert(0, '\u00B1dd mm ss')
         self.lat_entry.pack(side='left', padx=10)
@@ -80,13 +80,15 @@ class MainWindow:
         self.lon_entry.insert(0, '\u00B1dd mm ss')
         self.lon_entry.pack(side='left', padx=10)
         self.slider_label = ttk.Label(self.sun_frame_right, text="Enter coordinates to calculate Sun elevation. "
-                                                                 "Use arrows to move Sun through the day.")
+                                                                 "Use ← and → to move Sun.")
         self.slider_label.pack(padx=10, pady=10)
-        self.slider = ttk.Scale(self.sun_frame_right, from_=0, to=24 * 60, length=self.win_x * 0.4, orient="horizontal")
+
+        style = ttk.Style()
+        style.configure("TScale", troughcolor="LightBlue", foreground="orange", background='orange')
+        self.slider = ttk.Scale(self.sun_frame_right, from_=0, to=24 * 60, length=self.win_x * 0.4, orient="horizontal",
+                                style="TScale")
         self.slider.pack(padx=10, pady=10)
-        self.sun_image = ImageTk.PhotoImage(Image.open(path_to_af + "sun.png").resize((50, 50)))
-        self.sun_label = ttk.Label(self.sun_frame_right, image=self.sun_image, background="")
-        self.sun_label.pack(side='top')
+
         self.slider.bind("<Motion>", self.update_elevation)
         self.root.bind("<Left>", self.slide_left)
         self.root.bind("<Right>", self.slide_right)
@@ -125,7 +127,8 @@ class MainWindow:
         ### subframe update TLE button ###
         self.but_tle_frame = tk.Frame(self.tle_frame)
         self.but_tle_frame.pack(side='right', padx=5, pady=20)
-        self.but_tle_up = tk.Button(self.but_tle_frame, text='Update TLE!', command=self.click_update_tle, width=10)
+        self.but_tle_up = tk.Button(self.but_tle_frame, text='Update TLE!', command=self.click_update_tle, width=10,
+                                    bg='grey75')
         self.but_tle_up.pack()
 
         ### frame for distance entry ###
@@ -138,24 +141,24 @@ class MainWindow:
         ttk.Label(self.dist_frame, text="km").pack(side='left')
 
         ttk.Label(self.left_frame, text="Name for saving files (without extension) ").pack(side='top')
-        self.save_name = ttk.Entry(self.left_frame, width=int(self.win_x * 0.025))
+        self.save_name = ttk.Entry(self.left_frame, width=int(self.win_x * 0.03))
         self.save_name.insert(0, app_dir + "forecast_" + dt.utcnow().date().strftime("%d%m%Y"))
         self.save_name.pack(side='top', pady=10)
 
         ### frame for selecting a file ###
-        self.select_frame = tk.Frame(self.left_frame, highlightbackground="cyan", highlightcolor="cyan",
+        self.select_frame = tk.Frame(self.left_frame, highlightbackground="pink", highlightcolor="pink",
                                      highlightthickness=2)
         self.select_frame.pack(side='top', padx=10, pady=10)
 
         ### subframe for buttons and path ###
         self.select_frame_up = ttk.Frame(self.select_frame)
-        self.select_frame_up.pack(side='top', pady=10)
-        self.but_select = tk.Button(self.select_frame_up, text='Select a file', command=self.click_select)
-        self.but_select.pack(side='left')
+        self.select_frame_up.pack(side='top', pady=10, padx=10)
+        self.but_select = tk.Button(self.select_frame_up, text='Select a file', command=self.click_select, bg='pink')
+        self.but_select.pack(side='left', padx=10)
 
         ### subframe for speed and start_date entries ###
         self.select_frame_down = ttk.Frame(self.select_frame)
-        self.select_frame_down.pack(side='top', pady=5)
+        self.select_frame_down.pack(side='top', pady=5, padx=10)
 
         self.frame_green = ttk.Frame(self.left_frame)
         self.frame_green.pack(side='top')
@@ -165,13 +168,12 @@ class MainWindow:
                                   highlightthickness=2)
         self.add_frame.pack(side='top', pady=10)
 
-        self.add_row_button = tk.Button(self.add_frame, text="Add new row", command=self.add_row_to_column)
-        self.add_row_button.pack(pady=10, side='left', padx=5)
-        self.calc_table_button = tk.Button(self.add_frame, text="Calculate from table!", command=self.click_tab,
-                                           bg='LawnGreen')
-        self.calc_table_button.pack(pady=10, side='left', padx=5)
+        self.add_row_button = tk.Button(self.add_frame, text="Add new row", command=self.add_row_to_column, bg='LawnGreen')
+        self.add_row_button.pack(pady=10, side='left', padx=18)
+        self.calc_table_button = tk.Button(self.add_frame, text="Calculate from table!", command=self.click_tab)
+        self.calc_table_button.pack(pady=10, side='left', padx=18)
         self.rem_row_button = tk.Button(self.add_frame, text="Remove last row", command=self.remove_row_from_column)
-        self.rem_row_button.pack(pady=10, side='right', padx=5)
+        self.rem_row_button.pack(pady=10, side='right', padx=18)
 
         ### frame for tabular ###
         self.table_frame = ttk.Frame(self.frame_green)
@@ -233,9 +235,6 @@ class MainWindow:
             self.slider_label.config(
                 text=f"Selected time: {selected_hour:2d}:{selected_min:2d} UTC       "
                      f"Sun Elevation: {elevation:.2f}" + chr(176))
-
-            # if Sun icon moves not correctly change 250 on 200 or 300 and see what will change
-            self.sun_label.place(x=self.slider.get() / 24 / 60 * ((self.win_x - 250) * 0.4), y=32)
 
         except:
             pass
@@ -330,14 +329,14 @@ class MainWindow:
             ttk.Label(self.select_frame_down, text='Start date').pack(side='left', padx=5)
             self.date_entry = ttk.Entry(self.select_frame_down, width=10)
             self.date_entry.insert(0, "dd/mm/yy")
-            self.date_entry.pack(side='left')
+            self.date_entry.pack(side='left', padx=10)
 
             ttk.Label(self.select_frame_down, text='Time').pack(side='left', padx=5)
             self.time_entry = ttk.Entry(self.select_frame_down, width=6)
             self.time_entry.insert(0, "hh:mm")
-            self.time_entry.pack(side='left')
+            self.time_entry.pack(side='left', padx=10)
 
-            tk.Button(self.select_frame_up, text="Calculate from file!", command=self.click_calc_file, bg='cyan').pack(
+            tk.Button(self.select_frame_up, text="Calculate from file!", command=self.click_calc_file, bg='pink').pack(
                 side='right', padx=5)
             once_sel = False
 
@@ -398,10 +397,9 @@ class MainWindow:
             num_of_days = (datetimes[-1] - datetimes[0]).days + 1
             res_sheet = prepare_sheet(datetimes[0], num_of_days)
             path_to_save = self.save_name.get()
-            try:
-                convert_list(path_to_save + ".xlsx", res_sheet, self.res_list)
-            except:
-                messagebox.showerror("AltiFore: Saving Error", "Check entered path to saving!")
+
+            convert_list(path_to_save + ".xlsx", res_sheet, self.res_list)
+
             self.draw_map()
 
     def click_calc_file(self):
@@ -438,21 +436,24 @@ class MainWindow:
                                                                                              self.distance,
                                                                                              self.start_date, speed,
                                                                                              self.save_name)
+
+        if self.res_list == -1:
+            messagebox.showerror('Altifore: Saving error', 'Check path for saving!')
+            return 0
+
         num_of_days = (last_date - self.start_date).days + 2
         res_sheet = prepare_sheet(self.start_date, num_of_days)
         path_to_save = self.save_name.get()
-        try:
-            convert_list(path_to_save + ".xlsx", res_sheet, self.res_list)
-        except:
-            messagebox.showerror("AltiFore: Saving Error", "Check entered path to saving!")
+        convert_list(path_to_save + ".xlsx", res_sheet, self.res_list)
         self.draw_map()
 
     def add_row_to_column(self):
         """
         add a new row of entries to the bottom of table
         """
+        self.calc_table_button.config(bg='LawnGreen')
         for col in range(4):
-            en = ttk.Entry(self.line_frames[col], width=int(self.win_x * 0.006))
+            en = ttk.Entry(self.line_frames[col], width=int(self.win_x * 0.005))
 
             if len(self.entry_arr[-1]) != 0:
                 if self.entry_arr[col][-1].get() != "":
@@ -513,7 +514,7 @@ class MainWindow:
         self.sat_scat = self.ax.scatter(self.draw_arr[:, 0], self.draw_arr[:, 1], color=self.col_scat, s=5, zorder=10)
 
         for i in range(0, self.draw_arr[:, 0].shape[0], 3):
-            self.ax.plot(self.draw_arr[i:i + 3, 0], self.draw_arr[i:i + 3, 1], color=self.col_scat[i], lw = 1, zorder=10)
+            self.ax.plot(self.draw_arr[i:i + 3, 0], self.draw_arr[i:i + 3, 1], color=self.col_scat[i], lw=1, zorder=10)
 
         self.scat_loc = self.ax.scatter(self.tr_lon, self.tr_lat, label='Input locations', zorder=10, marker='+',
                                         color=self.col_loc, s=5)

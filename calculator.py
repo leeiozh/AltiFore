@@ -42,13 +42,13 @@ def calc_alt(distance):
 def calc(distance, lats, lons, times, save_name):
     """
     main calculation
-    :return: list fir table creating and array for drawing
+    :return: list for creating a table and array for drawing
     """
     path_to_save = save_name.get()
     try:
         ofile = open(path_to_save + ".txt", "w")  # output file
     except:
-        return -1
+        return -1, -1
 
     sats = load.tle_file(path_to_af + 'tle/tle_data.txt')
 
@@ -90,7 +90,7 @@ def calc(distance, lats, lons, times, save_name):
 
                         if t == res_sat[0][1]:  # save only central point of flight where sat the closest to us
                             res_list[n].append(
-                                {'sat_name': SAT_NAMES[i], 'date': t.utc_datetime().date().strftime("%d-%m-%Y"),
+                                {'sat_name': SAT_NAMES[i], 'date': t.utc_datetime().date().strftime("%d/%m/%Y"),
                                  'time': t.utc_datetime().time().strftime("%H:%M"),
                                  'dist': round(dist_km, 2), 'color': color_rgd[i], 'lat': lats[n], 'lon': lons[n]})
 
@@ -161,8 +161,11 @@ def calc_sunset_sunrise(latitude, longitude, day_of_year):
     elif np.all(elev < 0):
         return -1, -1
     else:
-        rise = np.argmax(elev > 0)
-        elev = elev[::-1]
-        set = np.argmax(elev < 0) / hour_minute.shape[0] * 24
+        rise = np.argmax(elev > 0)  # first positive element
+        set = len(elev) - np.argmax(elev[::-1] > 0)  # last positive element
+        if rise == 0:  # if sunrise was tomorrow
+            elev = elev[::-1]  # mirror array
+            rise = len(elev) - np.argmax(elev < 0)
+            set = np.argmax(elev[::-1] < 0)
 
-    return rise / hour_minute.shape[0] * 24, set
+    return rise / hour_minute.shape[0] * 24, set / hour_minute.shape[0] * 24

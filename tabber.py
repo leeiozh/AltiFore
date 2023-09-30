@@ -10,9 +10,8 @@ def convert_list(name, sheet, res_list):
     while len(res_list[st]) == 0:
         st += 1
     curr_date = res_list[st][0]['date']
-    num_day = dt.datetime.strptime(res_list[st][0]['date'], "%d-%m-%Y").timetuple()[7]
-    sr, ss = calc_sunset_sunrise(res_list[st][0]['lat'], res_list[st][0]['lon'], num_day)
-    sr, ss = sr_ss(sr, ss)
+
+    sr, ss = res_list_to_sr_ss(res_list[st])
     sheet.loc[sheet['date'] == curr_date, "sunrise"] = sr
     sheet.loc[sheet['date'] == curr_date, "sunset"] = ss
 
@@ -23,9 +22,7 @@ def convert_list(name, sheet, res_list):
                 curr_date = res_list[i][0]['date']
                 curr_flight = 0
 
-                num_day = dt.datetime.strptime(res_list[i][0]['date'], "%d-%m-%Y").timetuple()[7]
-                sr, ss = calc_sunset_sunrise(res_list[i][0]['lat'], res_list[i][0]['lon'], num_day)
-                sr, ss = sr_ss(sr, ss)
+                sr, ss = res_list_to_sr_ss(res_list[i])
                 sheet.loc[sheet['date'] == curr_date, "sunrise"] = sr
                 sheet.loc[sheet['date'] == curr_date, "sunset"] = ss
 
@@ -37,9 +34,10 @@ def convert_list(name, sheet, res_list):
     sheet.to_excel(name, index=False, engine='openpyxl')
     wb = openpyxl.load_workbook(name)
     ws = wb['Sheet1']
-    alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q']
+    alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']
 
     letter = 2
+    # filling a color
     try:
         row = (sheet.index[sheet['date'] == curr_date][0]) + 2
         for i in range(len(res_list)):
@@ -64,8 +62,19 @@ def prepare_sheet(start, nums):
         columns=['date', 'sunrise', 'sunset', 'flight 1', 'flight 2', 'flight 3', 'flight 4', 'flight 5', 'flight 6',
                  'flight 7', 'flight 8', 'flight 9', 'flight 10', 'flight 11', 'flight 12',
                  'flight 13', 'flight 14', 'flight 15', 'flight 16'])
-    res['date'] = [(start + dt.timedelta(days=i)).strftime("%d-%m-%Y") for i in range(nums)]
+    res['date'] = [(start + dt.timedelta(days=i)).strftime("%d/%m/%Y") for i in range(nums)]
     return res
+
+
+def res_list_to_sr_ss(inp):
+    num_day = dt.datetime.strptime(inp[0]['date'], "%d/%m/%Y").timetuple()[7]
+    # sunrise for first flight
+    sr, _ = calc_sunset_sunrise(inp[0]['lat'], inp[0]['lon'], num_day)
+    sr, _ = sr_ss(sr, _)
+    # sunset for last flight
+    _, ss = calc_sunset_sunrise(inp[-1]['lat'], inp[-1]['lon'], num_day)
+    _, ss = sr_ss(sr, ss)
+    return sr, ss
 
 
 def sr_ss(sr, ss):
