@@ -42,12 +42,16 @@ python3 altifore.py
 ```bash
 conda install -c conda-forge pyinstaller
 pyinstaller --onefile altifore.py --hidden-import='PIL._tkinter_finder' --hidden-import='openpyxl.cell._writer'
+mv -i dist/altifore .
+./altifore
 ```
 
 Альтернативно через pip:
 ```bash
 pip install pyinstaller
 pyinstaller --onefile altifore.py --hidden-import='PIL._tkinter_finder'
+mv -i dist/altifore .
+./altifore
 ```
 
 # Обновление TLE

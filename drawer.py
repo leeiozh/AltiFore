@@ -185,7 +185,7 @@ class MainWindow:
         labels = ["Date (dd/mm/yy)", "Time (hh:mm)", u"Latitude (\u00B1dd mm ss)", u"Longitude (\u00B1dd mm ss)"]
         for column in range(4):
             frame = tk.Frame(self.table_frame)
-            frame.pack(side="left", padx=int(self.win_x * 0.008), pady=10)
+            frame.pack(side="left", padx=int(self.win_x * 0.008), pady=5)
             ttk.Label(frame, text=labels[column]).pack(side="top")
             self.line_frames.append(frame)
 
@@ -453,7 +453,7 @@ class MainWindow:
         """
         self.calc_table_button.config(bg='LawnGreen')
         for col in range(4):
-            en = ttk.Entry(self.line_frames[col], width=int(self.win_x * 0.005))
+            en = ttk.Entry(self.line_frames[col], width=int(self.win_x * 0.006))
 
             if len(self.entry_arr[-1]) != 0:
                 if self.entry_arr[col][-1].get() != "":

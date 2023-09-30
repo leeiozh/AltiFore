@@ -73,7 +73,7 @@ def res_list_to_sr_ss(inp):
     sr, _ = sr_ss(sr, _)
     # sunset for last flight
     _, ss = calc_sunset_sunrise(inp[-1]['lat'], inp[-1]['lon'], num_day)
-    _, ss = sr_ss(sr, ss)
+    _, ss = sr_ss(_, ss)
     return sr, ss
 
 
