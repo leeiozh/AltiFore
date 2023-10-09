@@ -54,6 +54,11 @@ def calc(distance, lats, lons, times, save_name):
 
     try:
         sat_data = [{sat.name: sat for sat in sats}[name] for name in SAT_NAMES]
+
+        for s in sat_data:
+            vec = s.at(ts.from_datetime(times[0])).position.km
+            SAT_HEIGHTS.append(np.linalg.norm(np.array(vec)) - 6371)
+
     except KeyError:
         return [], []
 

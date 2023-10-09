@@ -38,8 +38,8 @@ class MainWindow:
         self.res_list = np.ndarray  # array for creating a schedule {sat_name, date, time, dist, color}
         self.tr_lat = []  # input track latitudes
         self.tr_lon = []  # input track longitudes
-        self.win_x = int(monitor_size[0] * 0.8)  # width of main window
-        self.win_y = int(monitor_size[1] * 0.7)  # height of main window
+        self.win_x = int(monitor_size[0])  # width of main window
+        self.win_y = int(monitor_size[1] * 0.8)  # height of main window
         self.center_x = int(0.5 * (monitor_size[0] - self.win_x))  # x coord of center of main window
         self.center_y = int(0.5 * (monitor_size[1] - self.win_y))  # y coord of center of main window
 
@@ -289,7 +289,6 @@ class MainWindow:
                     self.sty.configure("LabeledProgressbar", text="TLE wasn't updated =(")
                     self.root.update()
                     data.close()
-                    move(path_to_af + 'tle/tle_data_tmp.txt', path_to_af + 'tle/tle_data.txt')
                     return 0
 
                 data.write(f.text)
