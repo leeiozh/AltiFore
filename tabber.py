@@ -3,6 +3,7 @@ from openpyxl.styles import PatternFill
 import pandas as pd  # conda install -c conda-forge pandas
 import datetime as dt
 from calculator import calc_sunset_sunrise
+from const import SAT_NAMES, color_rgd
 
 
 def convert_list(name, sheet, res_list):
@@ -31,10 +32,15 @@ def convert_list(name, sheet, res_list):
                 sheet.loc[sheet['date'] == curr_date, f"flight {curr_flight}"] = res_list[i][j]['time']
 
     sheet.dropna(axis=1, how='all', inplace=True)
+    sheet = pd.concat([sheet, pd.DataFrame({'name': [sat_name for sat_name in SAT_NAMES]})], axis=1)
+
     sheet.to_excel(name, index=False, engine='openpyxl')
     wb = openpyxl.load_workbook(name)
     ws = wb['Sheet1']
     alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']
+
+    for s in range(len(SAT_NAMES)):
+        ws[str(alphabet[sheet.shape[1] - 1] + str(s + 2))].fill = PatternFill(patternType='solid', fgColor=color_rgd[s])
 
     letter = 2
     # filling a color

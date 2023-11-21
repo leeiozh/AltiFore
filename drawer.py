@@ -325,14 +325,16 @@ class MainWindow:
             self.speed_entry.pack(side='left')
             ttk.Label(self.select_frame_down, text='kn').pack(side='left', padx=10)
 
+            now = dt.utcnow().strftime("%d/%m/%y %H:%M").split(" ")
+
             ttk.Label(self.select_frame_down, text='Start date').pack(side='left', padx=5)
             self.date_entry = ttk.Entry(self.select_frame_down, width=10)
-            self.date_entry.insert(0, "dd/mm/yy")
+            self.date_entry.insert(0, now[0])
             self.date_entry.pack(side='left', padx=10)
 
             ttk.Label(self.select_frame_down, text='Time').pack(side='left', padx=5)
             self.time_entry = ttk.Entry(self.select_frame_down, width=6)
-            self.time_entry.insert(0, "hh:mm")
+            self.time_entry.insert(0, now[1])
             self.time_entry.pack(side='left', padx=10)
 
             tk.Button(self.select_frame_up, text="Calculate from file!", command=self.click_calc_file, bg='pink').pack(
@@ -473,14 +475,14 @@ class MainWindow:
         """
         drawing a map
         """
-        self.fig = plt.figure(figsize=(5, 5), dpi=400)
+        self.fig = plt.figure(figsize=(4, 8), dpi=400)
         self.ax = self.fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
 
         # limits
-        lat_min = int(np.min(self.tr_lat)) - 5
-        lat_max = int(np.max(self.tr_lat)) + 5
-        lon_min = int(np.min(self.tr_lon)) - 5
-        lon_max = int(np.max(self.tr_lon)) + 5
+        lat_min = int(np.min(self.tr_lat)) - 2
+        lat_max = int(np.max(self.tr_lat)) + 2
+        lon_min = int(np.min(self.tr_lon)) - 7
+        lon_max = int(np.max(self.tr_lon)) + 7
         self.ax.set_extent([lon_min, lon_max, lat_min, lat_max])
 
         # tick steps
@@ -567,7 +569,7 @@ class MainWindow:
 
             if np.min(distance) < 0.5:
                 arg = int(np.argmin(distance))
-                fl_time = dt.fromtimestamp(self.draw_arr[arg, 4]).strftime("%d.%m.%Y %H:%M:%S")
+                fl_time = dt.utcfromtimestamp(self.draw_arr[arg, 4]).strftime("%d.%m.%Y %H:%M:%S")
 
                 deg_lat = round(np.fix(self.draw_arr[arg, 1]))
                 min_lat = int((self.draw_arr[arg, 1] - deg_lat) * 60 * np.sign(self.draw_arr[arg, 1]))

@@ -1,3 +1,4 @@
+import numpy as np
 from skyfield.api import load, wgs84, utc  # conda install -c conda-forge skyfield
 import geopy.distance as dist  # conda install -c conda-forge geopy
 import datetime as dt
