@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as np  # conda install -c conda-forge numpy
 from skyfield.api import load, wgs84, utc  # conda install -c conda-forge skyfield
 import geopy.distance as dist  # conda install -c conda-forge geopy
 import datetime as dt
@@ -21,6 +21,7 @@ def calc_time(track, start, speed):
     """
     res = np.ndarray(track.shape[0] - 1, dtype=dt.datetime)
     res[0] = start
+
     for i in range(res.shape[0] - 1):
         res[i + 1] = res[i] + dt.timedelta(
             hours=(dist.geodesic((track[i + 1].y, track[i + 1].x), (track[i].y, track[i].x)).nm / speed))
@@ -30,7 +31,7 @@ def calc_time(track, start, speed):
 
 def calc_alt(distance):
     """
-    very stupid calculation of sat altitude where its gets into the {distance} radius circle
+    very stupid method for calculation sat altitude where its gets into the {distance} radius circle
     :param distance: radius of circle
     :return: array of sat altitudes
     """
@@ -107,39 +108,29 @@ def calc(distance, lats, lons, times, save_name):
                                         f"dist {round(dist_km, 2)} km\n\n")
 
         res_list[n] = sorted(res_list[n], key=lambda x: x['time'])  # sorted by time (but sometimes it does not work)
-
     ofile.close()
     return res_list, np.array(arr_for_draw)
 
 
 def calc_from_file(name, distance, start_date, speed, save_name):
-    # reading kml file
-    fiona.drvsupport.supported_drivers['KML'] = 'rw'
-    geo_df = gpd.read_file(name, driver='KML')
-    track_df = pd.DataFrame(geo_df)["geometry"]
+    if name[-3:] == "kml":
+        # reading kml file
+        fiona.drvsupport.supported_drivers['KML'] = 'rw'
+        geo_df = gpd.read_file(name, driver='KML')
+        track_df = pd.DataFrame(geo_df)["geometry"]
 
-    # preparing data for calculation
-    track_time = calc_time(track_df, start_date, speed=speed)
-    lat = [track_df[i].y for i in range(track_df.shape[0] - 1)]
-    lon = [track_df[i].x for i in range(track_df.shape[0] - 1)]
+        # preparing data for calculation
+        track_time = calc_time(track_df, start_date, speed=speed)
+        lat = [track_df[i].y for i in range(track_df.shape[0] - 1)]
+        lon = [track_df[i].x for i in range(track_df.shape[0] - 1)]
 
-    return calc(distance, lat, lon, track_time, save_name), track_time[-1], lat, lon
+        return calc(distance, lat, lon, track_time, save_name), track_time[-1], lat, lon
 
 
-def calc_sun(latitude, longitude, date):
+def calc_sun(latitude, longitude, day_of_year, hour_minute):
     """
     calculate sun elevation
     """
-    date = date.timetuple()
-    hour = date[3]
-    minute = date[4]
-    hour_minute = (hour + minute / 60)
-    day_of_year = date[7]
-
-    return calc_sun_(latitude, longitude, day_of_year, hour_minute)
-
-
-def calc_sun_(latitude, longitude, day_of_year, hour_minute):
     g = (360 / 365.25) * (day_of_year + hour_minute / 24)
     g_rad = math.radians(g)
     decl = 0.396372 - 22.91327 * math.cos(g_rad) + 4.02543 * math.sin(g_rad) - 0.387205 * math.cos(2 * g_rad) \
@@ -158,8 +149,7 @@ def calc_sun_(latitude, longitude, day_of_year, hour_minute):
 
 def calc_sunset_sunrise(latitude, longitude, day_of_year):
     hour_minute = np.linspace(0, 24, 24 * 60)
-
-    func = np.vectorize(calc_sun_)
+    func = np.vectorize(calc_sun)
     elev = func(latitude, longitude, day_of_year, hour_minute)
 
     if np.all(elev > 0):

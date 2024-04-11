@@ -1,9 +1,6 @@
-import tkinter as tk
-from tkinter import ttk
-from tkinter import filedialog as fd
-from tkinter import messagebox
-from PIL import Image, ImageTk
-
+import numpy as np  # conda install -c conda-forge numpy
+import tkinter as tk  # conda install -c conda-forge tk
+from tkinter import ttk, messagebox, filedialog
 from datetime import datetime as dt
 import requests
 from skyfield.api import utc  # conda install -c conda-forge skyfield
@@ -104,6 +101,13 @@ class MainWindow:
                        "In any unclear situation, please restart the app.\n\n"
                        "!!!!! ALL TIMES IN UTC FORMAT !!!!!", justify='center').pack(side='top')
 
+        self.ship_time_fr = tk.Frame(self.left_frame)
+        self.ship_time_fr.pack(side="top", pady=10)
+        self.ship_time_lab = tk.Label(self.ship_time_fr, text="Ship timezone   >>>   ")
+        self.ship_time_lab.pack(side="left")
+        self.ship_time_entry = tk.Entry(self.ship_time_fr, width=5)
+        self.ship_time_entry.insert(0, SHIP_TIME)
+        self.ship_time_entry.pack(side="left")
         self.tooltip_label = tk.Label(self.map_frame, text="Calculate smth to show a map", padx=5, pady=5)
         self.tooltip_label.pack(side='bottom')
 
@@ -153,12 +157,45 @@ class MainWindow:
         ### subframe for buttons and path ###
         self.select_frame_up = ttk.Frame(self.select_frame)
         self.select_frame_up.pack(side='top', pady=10, padx=10)
-        self.but_select = tk.Button(self.select_frame_up, text='Select a file', command=self.click_select, bg='pink')
+        # self.but_select = tk.Button(self.select_frame_up, text='Select a file', bg='pink')
+        # self.but_select.pack(side='left', padx=10)
+
+        if SELECT_FILE:
+            self.but_select = tk.Button(self.select_frame_up, text='Select a file', command=self.click_select,
+                                        bg='pink')
+        else:
+            self.but_select = tk.Button(self.select_frame_up, text='Select a file', bg='pink')
         self.but_select.pack(side='left', padx=10)
 
         ### subframe for speed and start_date entries ###
         self.select_frame_down = ttk.Frame(self.select_frame)
         self.select_frame_down.pack(side='top', pady=5, padx=10)
+
+        if not SELECT_FILE:
+            self.fname = path_to_af + "tomorrow.kml"
+            short_name = self.fname.rsplit('/', 1)[-1]  # only file name for displaying
+            self.fname_lab = ttk.Label(self.select_frame_up, text=short_name)
+            self.fname_lab.pack(side='left', padx=10)
+
+            ttk.Label(self.select_frame_down, text='Average speed').pack(side='left', padx=5)
+            self.speed_entry = ttk.Entry(self.select_frame_down, width=4)
+            self.speed_entry.pack(side='left')
+            ttk.Label(self.select_frame_down, text='kn').pack(side='left', padx=10)
+
+            now = dt.utcnow().strftime("%d/%m/%y %H:%M").split(" ")
+
+            ttk.Label(self.select_frame_down, text='Start date').pack(side='left', padx=5)
+            self.date_entry = ttk.Entry(self.select_frame_down, width=10)
+            self.date_entry.insert(0, now[0])
+            self.date_entry.pack(side='left', padx=10)
+
+            ttk.Label(self.select_frame_down, text='Time').pack(side='left', padx=5)
+            self.time_entry = ttk.Entry(self.select_frame_down, width=6)
+            self.time_entry.insert(0, now[1])
+            self.time_entry.pack(side='left', padx=10)
+
+            tk.Button(self.select_frame_up, text="Calculate from file!", command=self.click_calc_file, bg='pink').pack(
+                side='right', padx=5)
 
         self.frame_green = ttk.Frame(self.left_frame)
         self.frame_green.pack(side='top')
@@ -168,7 +205,8 @@ class MainWindow:
                                   highlightthickness=2)
         self.add_frame.pack(side='top', pady=10)
 
-        self.add_row_button = tk.Button(self.add_frame, text="Add new row", command=self.add_row_to_column, bg='LawnGreen')
+        self.add_row_button = tk.Button(self.add_frame, text="Add new row", command=self.add_row_to_column,
+                                        bg='LawnGreen')
         self.add_row_button.pack(pady=10, side='left', padx=18)
         self.calc_table_button = tk.Button(self.add_frame, text="Calculate from table!", command=self.click_tab)
         self.calc_table_button.pack(pady=10, side='left', padx=18)
@@ -192,12 +230,14 @@ class MainWindow:
         # initializing stuff which appears next
         self.fig = None  # map figure
         self.ax = None  # map axes
-        self.fname = None  # name of kml file
-        self.fname_lab = None  # text in label with selected file name
-        self.speed_entry = None  # entry of rv speed
-        self.date_entry = None  # entry of start date
-        self.time_entry = None  # entry of start time
-        self.distance = 200  # distance between rv and sat
+
+        if SELECT_FILE:
+            self.fname = None  # name of kml file
+            self.fname_lab = None  # text in label with selected file name
+            self.speed_entry = None  # entry of rv speed
+            self.date_entry = None  # entry of start date
+            self.time_entry = None  # entry of start time
+            self.distance = 200  # distance between rv and sat
         self.toolbar = None  # map toolbar
         self.canvas = None  # canvas for map
         self.canvas_widget = None  # canvas widget for map
@@ -309,7 +349,7 @@ class MainWindow:
         global once_sel
 
         ftypes = (('OpenCPN files', '*.kml'), ('All files', '*.*'))
-        self.fname = fd.askopenfilename(title='Select a file', initialdir=__file__, filetypes=ftypes)
+        self.fname = filedialog.askopenfilename(title='Select a file', initialdir=__file__, filetypes=ftypes)
 
         short_name = self.fname.rsplit('/', 1)[-1]  # only file name for displaying
         if once_sel:
@@ -479,10 +519,10 @@ class MainWindow:
         self.ax = self.fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
 
         # limits
-        lat_min = int(np.min(self.tr_lat)) - 2
-        lat_max = int(np.max(self.tr_lat)) + 2
-        lon_min = int(np.min(self.tr_lon)) - 7
-        lon_max = int(np.max(self.tr_lon)) + 7
+        lat_min = int(np.min(self.tr_lat)) - 3
+        lat_max = int(np.max(self.tr_lat)) + 3
+        lon_min = int(np.min(self.tr_lon)) - 3
+        lon_max = int(np.max(self.tr_lon)) + 3
         self.ax.set_extent([lon_min, lon_max, lat_min, lat_max])
 
         # tick steps
@@ -512,19 +552,25 @@ class MainWindow:
 
         self.col_scat = [colors[int(s)] for s in self.draw_arr[:, 2]]
         self.col_loc = ['black' for s in self.tr_lat]
-        self.sat_scat = self.ax.scatter(self.draw_arr[:, 0], self.draw_arr[:, 1], color=self.col_scat, s=5, zorder=10)
+        self.sat_scat = self.ax.scatter(self.draw_arr[:, 0], self.draw_arr[:, 1], edgecolors=self.col_scat, s=3,
+                                        zorder=10,
+                                        facecolors=None)
 
         for i in range(0, self.draw_arr[:, 0].shape[0], 3):
             self.ax.plot(self.draw_arr[i:i + 3, 0], self.draw_arr[i:i + 3, 1], color=self.col_scat[i], lw=1, zorder=10)
 
-        self.scat_loc = self.ax.scatter(self.tr_lon, self.tr_lat, label='Input locations', zorder=10, marker='+',
-                                        color=self.col_loc, s=5)
+        self.scat_loc = self.ax.scatter(self.tr_lon, self.tr_lat, label='Маршрут НЭС', zorder=10, marker='+',
+                                        color=self.col_loc, s=3)
         self.circ = Circle((0, -89.9), self.distance / 111., fill=False, color='aqua', transform=ccrs.PlateCarree())
         self.ax.add_artist(self.circ)
 
+        pp = []
+        pp.append(self.scat_loc)
+
         for i in range(len(SAT_NAMES)):
-            plt.scatter([0], [-89.9], color=colors[i], label=SAT_NAMES[i])
-        plt.legend(loc='best', fontsize="4")
+            pp_ = plt.scatter([0], [-89.9], color=colors[i], label=SAT_NAMES[i])
+            pp.append(pp_)
+
         path_to_save = self.save_name.get()
         try:
             plt.savefig(path_to_save + ".png", dpi=600, bbox_inches='tight')
@@ -569,7 +615,11 @@ class MainWindow:
 
             if np.min(distance) < 0.5:
                 arg = int(np.argmin(distance))
-                fl_time = dt.utcfromtimestamp(self.draw_arr[arg, 4]).strftime("%d.%m.%Y %H:%M:%S")
+                fl_time = dt.utcfromtimestamp(self.draw_arr[arg, 4]).strftime("%d.%m.%Y %H:%M")
+
+                ship_time = float(self.ship_time_entry.get())
+
+                fl_ship = dt.utcfromtimestamp(self.draw_arr[arg, 4] + ship_time * 3600).strftime("%H:%M")
 
                 deg_lat = round(np.fix(self.draw_arr[arg, 1]))
                 min_lat = int((self.draw_arr[arg, 1] - deg_lat) * 60 * np.sign(self.draw_arr[arg, 1]))
@@ -579,7 +629,8 @@ class MainWindow:
                 coords = " Lat: " + str(deg_lat) + chr(176) + str(min_lat)
                 coords += "', Lon: " + str(deg_lon) + chr(176) + str(min_lon) + "'"
 
-                message = f"{SAT_NAMES[int(self.draw_arr[arg, 2])]} : " + fl_time + coords + f", Dist = {self.draw_arr[arg, 3]} km"
+                message = f"{SAT_NAMES[int(self.draw_arr[arg, 2])]} : " + fl_time + " (" + fl_ship + ") " \
+                          + coords + f", Dist = {self.draw_arr[arg, 3]} km"
 
                 if self.circ.center[0] != self.draw_arr[arg, -2] and self.circ.center[1] != self.draw_arr[arg, -3]:
                     # updating place of circle
