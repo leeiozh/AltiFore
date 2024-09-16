@@ -8,59 +8,60 @@ from const import SAT_NAMES, color_rgd
 
 def convert_list(name, sheet, res_list):
     st = 0
-    while len(res_list[st]) == 0:
-        st += 1
-    curr_date = res_list[st][0]['date']
+    if len(res_list) > 0:
+        while len(res_list[st]) == 0:
+            st += 1
+        curr_date = res_list[st][0]['date']
 
-    sr, ss = res_list_to_sr_ss(res_list[st])
-    sheet.loc[sheet['date'] == curr_date, "sunrise"] = sr
-    sheet.loc[sheet['date'] == curr_date, "sunset"] = ss
+        sr, ss = res_list_to_sr_ss(res_list[st])
+        sheet.loc[sheet['date'] == curr_date, "sunrise"] = sr
+        sheet.loc[sheet['date'] == curr_date, "sunset"] = ss
 
-    curr_flight = 0
-    for i in range(st, len(res_list)):
-        if len(res_list[i]) != 0:
-            if curr_date != res_list[i][0]['date']:
-                curr_date = res_list[i][0]['date']
-                curr_flight = 0
-
-                sr, ss = res_list_to_sr_ss(res_list[i])
-                sheet.loc[sheet['date'] == curr_date, "sunrise"] = sr
-                sheet.loc[sheet['date'] == curr_date, "sunset"] = ss
-
-            for j in range(len(res_list[i])):
-                curr_flight += 1
-                sheet.loc[sheet['date'] == curr_date, f"flight {curr_flight}"] = res_list[i][j]['time']
-
-    sheet.dropna(axis=1, how='all', inplace=True)
-    sheet = pd.concat([sheet, pd.DataFrame({'name': [sat_name for sat_name in SAT_NAMES]})], axis=1)
-
-    sheet.to_excel(name, index=False, engine='openpyxl')
-    wb = openpyxl.load_workbook(name)
-    ws = wb['Sheet1']
-    alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']
-
-    for s in range(len(SAT_NAMES)):
-        ws[str(alphabet[sheet.shape[1] - 1] + str(s + 2))].fill = PatternFill(patternType='solid', fgColor=color_rgd[s])
-
-    letter = 2
-    # filling a color
-    try:
-        row = (sheet.index[sheet['date'] == curr_date][0]) + 2
-        for i in range(len(res_list)):
+        curr_flight = 0
+        for i in range(st, len(res_list)):
             if len(res_list[i]) != 0:
                 if curr_date != res_list[i][0]['date']:
                     curr_date = res_list[i][0]['date']
-                    letter = 2
-                    row = (sheet.index[sheet['date'] == curr_date][0]) + 2
+                    curr_flight = 0
 
-                for res_it in res_list[i]:
-                    letter += 1
-                    ws[str(alphabet[letter] + str(row))].fill = PatternFill(patternType='solid',
-                                                                            fgColor=res_it['color'])
-    except:
-        pass
+                    sr, ss = res_list_to_sr_ss(res_list[i])
+                    sheet.loc[sheet['date'] == curr_date, "sunrise"] = sr
+                    sheet.loc[sheet['date'] == curr_date, "sunset"] = ss
 
-    wb.save(name)
+                for j in range(len(res_list[i])):
+                    curr_flight += 1
+                    sheet.loc[sheet['date'] == curr_date, f"flight {curr_flight}"] = res_list[i][j]['time']
+
+        sheet.dropna(axis=1, how='all', inplace=True)
+        sheet = pd.concat([sheet, pd.DataFrame({'name': [sat_name for sat_name in SAT_NAMES]})], axis=1)
+
+        sheet.to_excel(name, index=False, engine='openpyxl')
+        wb = openpyxl.load_workbook(name)
+        ws = wb['Sheet1']
+        alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']
+
+        for s in range(len(SAT_NAMES)):
+            ws[str(alphabet[sheet.shape[1] - 1] + str(s + 2))].fill = PatternFill(patternType='solid', fgColor=color_rgd[s])
+
+        letter = 2
+        # filling a color
+        try:
+            row = (sheet.index[sheet['date'] == curr_date][0]) + 2
+            for i in range(len(res_list)):
+                if len(res_list[i]) != 0:
+                    if curr_date != res_list[i][0]['date']:
+                        curr_date = res_list[i][0]['date']
+                        letter = 2
+                        row = (sheet.index[sheet['date'] == curr_date][0]) + 2
+
+                    for res_it in res_list[i]:
+                        letter += 1
+                        ws[str(alphabet[letter] + str(row))].fill = PatternFill(patternType='solid',
+                                                                                fgColor=res_it['color'])
+        except:
+            pass
+
+        wb.save(name)
 
 
 def prepare_sheet(start, nums):

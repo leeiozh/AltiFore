@@ -17,6 +17,9 @@ import cartopy.feature as cfe
 from tabber import prepare_sheet, convert_list
 from calculator import calc_from_file, calc, calc_sun
 from const import *
+from pyproj import Geod
+
+geod = Geod(ellps="WGS84")
 
 once_sel = True  # flag for only one select file
 once_cal = True  # flag for only one run calculation
@@ -50,45 +53,45 @@ class MainWindow:
         self.right_frame.pack_propagate(False)
 
         ### frame for sun at the top of right_frame ###
-        self.sun_frame = tk.Frame(self.right_frame, highlightbackground="orange", highlightcolor="orange",
-                                  highlightthickness=2)
-        self.sun_frame.pack(side='top', pady=20)
-        self.sun_frame_left = tk.Frame(self.sun_frame)
-        self.sun_frame_left.pack(side='left', padx=5)
-        self.sun_frame_left_up = tk.Frame(self.sun_frame_left)
-        self.sun_frame_left_up.pack(side='top', padx=5, pady=10)
-        self.sun_frame_left_down = tk.Frame(self.sun_frame_left)
-        self.sun_frame_left_down.pack(side='top', padx=5)
-        self.sun_frame_right = tk.Frame(self.sun_frame)
-        self.sun_frame_right.pack(side='right', padx=5)
+        # self.sun_frame = tk.Frame(self.right_frame, highlightbackground="orange", highlightcolor="orange",
+        #                           highlightthickness=2)
+        # self.sun_frame.pack(side='top', pady=20)
+        # self.sun_frame_left = tk.Frame(self.sun_frame)
+        # self.sun_frame_left.pack(side='left', padx=5)
+        # self.sun_frame_left_up = tk.Frame(self.sun_frame_left)
+        # self.sun_frame_left_up.pack(side='top', padx=5, pady=10)
+        # self.sun_frame_left_down = tk.Frame(self.sun_frame_left)
+        # self.sun_frame_left_down.pack(side='top', padx=5)
+        # self.sun_frame_right = tk.Frame(self.sun_frame)
+        # self.sun_frame_right.pack(side='right', padx=5)
         self.map_frame = tk.Frame(self.right_frame)
         self.map_frame.pack(side='top', expand=True, fill='both')
-        ttk.Label(self.sun_frame_left_up, text="Your date ").pack(side='left', pady=10)
-        self.dat_entry = ttk.Entry(self.sun_frame_left_up, width=10)
-        sup_date = dt.utcnow().date().strftime("%d/%m/%Y")
-        self.dat_entry.insert(0, sup_date)
-        self.dat_entry.pack(side='left', padx=10)
-        ttk.Label(self.sun_frame_left_down, text="Your latitude ").pack(side='left', pady=10)
-        self.lat_entry = ttk.Entry(self.sun_frame_left_down, width=10)
-        self.lat_entry.insert(0, '\u00B1dd mm ss')
-        self.lat_entry.pack(side='left', padx=10)
-        ttk.Label(self.sun_frame_left_down, text="longitude ").pack(side='left')
-        self.lon_entry = ttk.Entry(self.sun_frame_left_down, width=10)
-        self.lon_entry.insert(0, '\u00B1dd mm ss')
-        self.lon_entry.pack(side='left', padx=10)
-        self.slider_label = ttk.Label(self.sun_frame_right, text="Enter coordinates to calculate Sun elevation. "
-                                                                 "Use ← and → to move Sun.")
-        self.slider_label.pack(padx=10, pady=10)
+        # ttk.Label(self.sun_frame_left_up, text="Your date ").pack(side='left', pady=10)
+        # self.dat_entry = ttk.Entry(self.sun_frame_left_up, width=10)
+        # sup_date = dt.utcnow().date().strftime("%d/%m/%Y")
+        # self.dat_entry.insert(0, sup_date)
+        # self.dat_entry.pack(side='left', padx=10)
+        # ttk.Label(self.sun_frame_left_down, text="Your latitude ").pack(side='left', pady=10)
+        # self.lat_entry = ttk.Entry(self.sun_frame_left_down, width=10)
+        # self.lat_entry.insert(0, '\u00B1dd mm ss')
+        # self.lat_entry.pack(side='left', padx=10)
+        # ttk.Label(self.sun_frame_left_down, text="longitude ").pack(side='left')
+        # self.lon_entry = ttk.Entry(self.sun_frame_left_down, width=10)
+        # self.lon_entry.insert(0, '\u00B1dd mm ss')
+        # self.lon_entry.pack(side='left', padx=10)
+        # self.slider_label = ttk.Label(self.sun_frame_right, text="Enter coordinates to calculate Sun elevation. "
+        #                                                         "Use ← and → to move Sun.")
+        # self.slider_label.pack(padx=10, pady=10)
 
-        style = ttk.Style()
-        style.configure("TScale", troughcolor="LightBlue", foreground="orange", background='orange')
-        self.slider = ttk.Scale(self.sun_frame_right, from_=0, to=24 * 60, length=self.win_x * 0.4, orient="horizontal",
-                                style="TScale")
-        self.slider.pack(padx=10, pady=10)
-
-        self.slider.bind("<Motion>", self.update_elevation)
-        self.root.bind("<Left>", self.slide_left)
-        self.root.bind("<Right>", self.slide_right)
+        # style = ttk.Style()
+        # style.configure("TScale", troughcolor="LightBlue", foreground="orange", background='orange')
+        # self.slider = ttk.Scale(self.sun_frame_right, from_=0, to=24 * 60, length=self.win_x * 0.4, orient="horizontal",
+        #                         style="TScale")
+        # self.slider.pack(padx=10, pady=10)
+        #
+        # self.slider.bind("<Motion>", self.update_elevation)
+        # self.root.bind("<Left>", self.slide_left)
+        # self.root.bind("<Right>", self.slide_right)
 
         ### frame for updating, selection and entering data ###
         self.left_frame = tk.Frame(self.root)
@@ -246,6 +249,8 @@ class MainWindow:
         self.col_scat = None  # color of scatter for circle
         self.sat_scat = None  # sat of scatter for circle
         self.circ = None  # circle around current highlight point
+        self.circ_cent_lon = 0
+        self.circ_cent_lat = 0
         self.start_date = None  # start date of calculation
 
     def update_elevation(self, event):
@@ -311,7 +316,9 @@ class MainWindow:
         with open(path_to_af + 'tle/tle_sites.txt', 'r') as file:  # reading sites from file with links
             for count, line in enumerate(file):
                 try:
-                    f = requests.get(line)
+                    f = requests.get(line[:-1])
+                    if f.status_code != 200:
+                        messagebox.showerror(title="AltiFore: Upload TLE error", message="Check your connection!")
 
                 except requests.exceptions.RequestException as e:
 
@@ -515,16 +522,18 @@ class MainWindow:
         """
         drawing a map
         """
-        self.fig = plt.figure(figsize=(4, 8), dpi=400)
-        self.ax = self.fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
-
+        self.fig = plt.figure(figsize=(4, 8), dpi=300)
         # limits
         lat_min = int(np.min(self.tr_lat)) - 3
         lat_max = int(np.max(self.tr_lat)) + 3
         lon_min = int(np.min(self.tr_lon)) - 3
         lon_max = int(np.max(self.tr_lon)) + 3
+        if PROJECTION == "Ortho":
+            self.ax = self.fig.add_subplot(1, 1, 1, projection=ccrs.Orthographic(0.5 * (lon_min + lon_max),
+                                                                                 0.5 * (lat_min + lat_max)))
+        else:
+            self.ax = self.fig.add_subplot(1, 1, 1, projection=ccrs.Mercator())
         self.ax.set_extent([lon_min, lon_max, lat_min, lat_max])
-
         # tick steps
         step_lon = (lon_max - lon_min) / 10.
         step_lat = (lat_max - lat_min) / 10.
@@ -533,12 +542,12 @@ class MainWindow:
 
         resol = '50m'
         ocean = cfe.NaturalEarthFeature('physical', 'ocean', scale=resol, edgecolor='none', facecolor='white')
-        land = cfe.NaturalEarthFeature('physical', 'land', scale=resol, edgecolor='k', facecolor=cfe.COLORS['land'])
+        land = cfe.NaturalEarthFeature('physical', 'land', scale=resol, edgecolor='k',
+                                       facecolor=cfe.COLORS['land_alt1'])
 
         self.ax.add_feature(ocean, zorder=0, linewidth=0.2)
         self.ax.add_feature(land, zorder=0, linewidth=0.2)
         self.ax.add_feature(cfe.COASTLINE, linewidth=0.2, zorder=0)
-        self.ax.add_feature(cfe.BORDERS, linestyle=':', linewidth=0.2, zorder=0)
 
         gl = self.ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True, linewidth=0.2, color='grey', alpha=1)
         gl.bottom_labels = False
@@ -553,27 +562,31 @@ class MainWindow:
         self.col_scat = [colors[int(s)] for s in self.draw_arr[:, 2]]
         self.col_loc = ['black' for s in self.tr_lat]
         self.sat_scat = self.ax.scatter(self.draw_arr[:, 0], self.draw_arr[:, 1], edgecolors=self.col_scat, s=3,
-                                        zorder=10,
-                                        facecolors=None)
+                                        zorder=10, facecolors=None, transform=ccrs.PlateCarree())
 
         for i in range(0, self.draw_arr[:, 0].shape[0], 3):
-            self.ax.plot(self.draw_arr[i:i + 3, 0], self.draw_arr[i:i + 3, 1], color=self.col_scat[i], lw=1, zorder=10)
+            self.ax.plot(self.draw_arr[i:i + 3, 0], self.draw_arr[i:i + 3, 1], color=self.col_scat[i], lw=1, zorder=10,
+                         transform=ccrs.PlateCarree())
 
-        self.scat_loc = self.ax.scatter(self.tr_lon, self.tr_lat, label='Маршрут НЭС', zorder=10, marker='+',
-                                        color=self.col_loc, s=3)
-        self.circ = Circle((0, -89.9), self.distance / 111., fill=False, color='aqua', transform=ccrs.PlateCarree())
-        self.ax.add_artist(self.circ)
-
+        self.scat_loc = self.ax.scatter(self.tr_lon, self.tr_lat, label='Маршрут', zorder=10, marker='+',
+                                        color=self.col_loc, s=3, transform=ccrs.PlateCarree())
+        # self.circ =
+        #
+        #     Circle((0, -89.9), self.distance / 111., fill=False, color='aqua', transform=ccrs.PlateCarree())
+        # self.ax.add_artist(self.circ)
+        self.circ, = self.ax.plot([0], [-89.9], color="black", transform=ccrs.PlateCarree(), zorder=9)
+        self.circ_cent_lat = -89.9
+        self.circ_cent_lon = 0
         pp = []
         pp.append(self.scat_loc)
 
         for i in range(len(SAT_NAMES)):
-            pp_ = plt.scatter([0], [-89.9], color=colors[i], label=SAT_NAMES[i])
+            pp_ = plt.scatter([0], [-89.9], color=colors[i], label=SAT_NAMES[i], transform=ccrs.PlateCarree())
             pp.append(pp_)
 
         path_to_save = self.save_name.get()
         try:
-            plt.savefig(path_to_save + ".png", dpi=600, bbox_inches='tight')
+            plt.savefig(path_to_save + ".png", dpi=300, bbox_inches='tight')
         except:
             messagebox.showerror("AltiFore: Saving Error", "Check entered path to saving!")
 
@@ -602,12 +615,17 @@ class MainWindow:
         self.col_scat = None  # color of scatter for circle
         self.sat_scat = None  # sat of scatter for circle
         self.circ = None  # circle around current highlight point
+        self.circ_cent_lat = -89.9
+        self.circ_cent_lon = 0
 
     def display_coords(self, event):
         """
         displaying coordinates of cursor or the flight, drawing circle around chosen point
         """
-        x, y = event.xdata, event.ydata
+        inverse_trans = self.ax.transData.inverted()
+        geo_coords = inverse_trans.transform((event.x, event.y))
+        longitude, latitude = geo_coords
+        x, y = ccrs.PlateCarree().transform_point(longitude, latitude, self.ax.projection)
         message = None
 
         if x is not None and y is not None:
@@ -632,22 +650,46 @@ class MainWindow:
                 message = f"{SAT_NAMES[int(self.draw_arr[arg, 2])]} : " + fl_time + " (" + fl_ship + ") " \
                           + coords + f", Dist = {self.draw_arr[arg, 3]} km"
 
-                if self.circ.center[0] != self.draw_arr[arg, -2] and self.circ.center[1] != self.draw_arr[arg, -3]:
+                if self.circ_cent_lon != self.draw_arr[arg, -2] and self.circ_cent_lat != self.draw_arr[arg, -3]:
                     # updating place of circle
-                    self.circ.center = self.draw_arr[arg, -2], self.draw_arr[arg, -3]
-                    self.circ.radius = self.draw_arr[arg, 3] / 111. / np.cos(self.draw_arr[arg, -3] / 180. * np.pi)
+
+                    self.circ_cent_lat = self.draw_arr[arg, -3]
+                    self.circ_cent_lon = self.draw_arr[arg, -2]
+
+                    ang = np.linspace(0, 360, 36)
+                    circle_arr = np.zeros(shape=(ang.shape[0], 2))
+                    for i, a in enumerate(ang):
+                        circle_arr[i, 0], circle_arr[i, 1], _ = geod.fwd(self.circ_cent_lon, self.circ_cent_lat, a,
+                                                                         self.draw_arr[arg, 3] * 1000.)
+
+                    self.circ.remove()
+                    self.circ, = self.ax.plot(circle_arr[:, 0], circle_arr[:, 1], transform=ccrs.PlateCarree(),
+                                              color='black', lw=0.5)
+
+                    # self.circ.center = self.draw_arr[arg, -2], self.draw_arr[arg, -3]
+                    # self.circ.radius = self.draw_arr[arg, 3] / 111. / np.cos(self.draw_arr[arg, -3] / 180. * np.pi)
                     self.col_loc = ['black' for s in self.tr_lat]
-                    self.col_loc[int(self.draw_arr[arg, -1])] = 'aqua'
+                    self.col_loc[int(self.draw_arr[arg, -1])] = 'red'
+
+                # if self.circ.center[0] != self.draw_arr[arg, -2] and self.circ.center[1] != self.draw_arr[arg, -3]:
+                #     # updating place of circle
+                #     self.circ.center = self.draw_arr[arg, -2], self.draw_arr[arg, -3]
+                #     self.circ.radius = self.draw_arr[arg, 3] / 111. / np.cos(self.draw_arr[arg, -3] / 180. * np.pi)
+                #     self.col_loc = ['black' for s in self.tr_lat]
+                #     self.col_loc[int(self.draw_arr[arg, -1])] = 'aqua'
 
             else:
                 # removing circle and colorful points
                 self.col_loc = ['black' for s in self.tr_lat]
-                self.circ.center = 0, -89.9
+                # self.circ.remove()
+                self.circ_cent_lat = -89.9
+                self.circ_cent_lon = 0
+                # self.circ.center = 0, -89.9
 
             self.scat_loc.remove()
             # updating a color of track points
             self.scat_loc = self.ax.scatter(self.tr_lon, self.tr_lat, label='Input locations', zorder=10, marker='+',
-                                            color=self.col_loc, s=5)
+                                            color=self.col_loc, s=5, transform=ccrs.PlateCarree())
             self.canvas.draw()
 
             if message is None:  # if we far from any flight display cursor coordinates
