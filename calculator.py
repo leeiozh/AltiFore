@@ -6,27 +6,55 @@ import fiona  # conda install -c conda-forge fiona
 import geopandas as gpd  # conda install -c conda-forge geopandas
 import pandas as pd  # conda install -c conda-forge pandas
 from const import *
+from pyproj import Geod
 import math
+
+geod = Geod(ellps="WGS84")
 
 ts = load.timescale()
 
 
-def calc_time(track, start, speed):
-    """
-    calculating time of track points if we suppose constant speed
-    :param track: array of track points
-    :param start: datetime of start point
-    :param speed: constant speed
-    :return: array of times
-    """
-    res = np.ndarray(track.shape[0] - 1, dtype=dt.datetime)
-    res[0] = start
+def calc_track(lat, lon, start, speed):
+    new_lats = [lat[0]]
+    new_lons = [lon[0]]
+    new_times = [start]
 
-    for i in range(res.shape[0] - 1):
-        res[i + 1] = res[i] + dt.timedelta(
-            hours=(dist.geodesic((track[i + 1].y, track[i + 1].x), (track[i].y, track[i].x)).nm / speed))
-    res = [r.replace(tzinfo=utc) for r in res]
-    return res
+    for i in range(1, len(lat)):
+        azimuth, _, distance = geod.inv(lon[i - 1], lat[i - 1], lon[i], lat[i])
+
+        time_interval = distance / (speed * 0.51444)
+        current_time = new_times[-1]
+        num_intervals = int(time_interval // int(GAP * 3600))
+        for j in range(1, num_intervals + 1):
+            fraction = j * int(GAP * 3600) / time_interval
+            inter_lon, inter_lat, _ = geod.fwd(lon[i - 1], lat[i - 1], azimuth, fraction * distance)
+            new_lats.append(inter_lat)
+            new_lons.append(inter_lon)
+            new_times.append(current_time + dt.timedelta(seconds=j * int(GAP * 3600)))
+
+        new_lats.append(lat[i])
+        new_lons.append(lon[i])
+        new_times.append(current_time + dt.timedelta(seconds=time_interval))
+
+    return new_lats, new_lons, new_times
+
+
+# def calc_time(track, start, speed):
+#     """
+#     calculating time of track points if we suppose constant speed
+#     :param track: array of track points
+#     :param start: datetime of start point
+#     :param speed: constant speed
+#     :return: array of times
+#     """
+#     res = np.ndarray(track.shape[0] - 1, dtype=dt.datetime)
+#     res[0] = start
+#
+#     for i in range(res.shape[0] - 1):
+#         res[i + 1] = res[i] + dt.timedelta(
+#             hours=(dist.geodesic((track[i + 1].y, track[i + 1].x), (track[i].y, track[i].x)).nm / speed))
+#     res = [r.replace(tzinfo=utc) for r in res]
+#     return res
 
 
 def calc_alt(distance):
@@ -120,17 +148,13 @@ def calc_from_file(name, distance, start_date, speed, save_name):
         track_df = pd.DataFrame(geo_df)["geometry"]
 
         # preparing data for calculation
-        track_time = calc_time(track_df, start_date, speed=speed)
         lat = [track_df[i].y for i in range(track_df.shape[0] - 1)]
         lon = [track_df[i].x for i in range(track_df.shape[0] - 1)]
-
+        lat, lon, track_time = calc_track(lat, lon, start_date, speed)
         return calc(distance, lat, lon, track_time, save_name), track_time[-1], lat, lon
 
 
 def calc_sun(latitude, longitude, day_of_year, hour_minute):
-    """
-    calculate sun elevation
-    """
     g = (360 / 365.25) * (day_of_year + hour_minute / 24)
     g_rad = math.radians(g)
     decl = 0.396372 - 22.91327 * math.cos(g_rad) + 4.02543 * math.sin(g_rad) - 0.387205 * math.cos(2 * g_rad) \

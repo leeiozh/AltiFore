@@ -9,13 +9,12 @@ from shutil import move
 import matplotlib.pyplot as plt  # conda install -c conda-forge matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import matplotlib.ticker as mticker
-from matplotlib.patches import Circle
 import cartopy.crs as ccrs  # conda install -c conda-forge cartopy
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import cartopy.feature as cfe
 
 from tabber import prepare_sheet, convert_list
-from calculator import calc_from_file, calc, calc_sun
+from calculator import calc_from_file, calc  # , calc_sun
 from const import *
 from pyproj import Geod
 
@@ -32,13 +31,13 @@ class MyToolbar(NavigationToolbar2Tk):
 
 
 class MainWindow:
-    def __init__(self, monitor_size=(1920, 1080)):
+    def __init__(self, monitor_size):
 
         self.draw_arr = np.ndarray  # array of data for drawing [lat_sat, lon_sat, num_sat, dist_km, time, lat_rv, lon_rv, num_dot]]
         self.res_list = np.ndarray  # array for creating a schedule {sat_name, date, time, dist, color}
         self.tr_lat = []  # input track latitudes
         self.tr_lon = []  # input track longitudes
-        self.win_x = int(monitor_size[0])  # width of main window
+        self.win_x = int(monitor_size[0] * 0.8)  # width of main window
         self.win_y = int(monitor_size[1] * 0.8)  # height of main window
         self.center_x = int(0.5 * (monitor_size[0] - self.win_x))  # x coord of center of main window
         self.center_y = int(0.5 * (monitor_size[1] - self.win_y))  # y coord of center of main window
@@ -48,59 +47,21 @@ class MainWindow:
         self.root.geometry(f'{self.win_x}x{self.win_y}+{self.center_x}+{self.center_y}')
 
         ### frame for sun and map ###
-        self.right_frame = tk.Frame(self.root)
+        self.right_frame = tk.Frame(self.root, width=0.6 * self.win_x)
         self.right_frame.pack(side='right', expand=True, fill='both')
         self.right_frame.pack_propagate(False)
 
-        ### frame for sun at the top of right_frame ###
-        # self.sun_frame = tk.Frame(self.right_frame, highlightbackground="orange", highlightcolor="orange",
-        #                           highlightthickness=2)
-        # self.sun_frame.pack(side='top', pady=20)
-        # self.sun_frame_left = tk.Frame(self.sun_frame)
-        # self.sun_frame_left.pack(side='left', padx=5)
-        # self.sun_frame_left_up = tk.Frame(self.sun_frame_left)
-        # self.sun_frame_left_up.pack(side='top', padx=5, pady=10)
-        # self.sun_frame_left_down = tk.Frame(self.sun_frame_left)
-        # self.sun_frame_left_down.pack(side='top', padx=5)
-        # self.sun_frame_right = tk.Frame(self.sun_frame)
-        # self.sun_frame_right.pack(side='right', padx=5)
         self.map_frame = tk.Frame(self.right_frame)
         self.map_frame.pack(side='top', expand=True, fill='both')
-        # ttk.Label(self.sun_frame_left_up, text="Your date ").pack(side='left', pady=10)
-        # self.dat_entry = ttk.Entry(self.sun_frame_left_up, width=10)
-        # sup_date = dt.utcnow().date().strftime("%d/%m/%Y")
-        # self.dat_entry.insert(0, sup_date)
-        # self.dat_entry.pack(side='left', padx=10)
-        # ttk.Label(self.sun_frame_left_down, text="Your latitude ").pack(side='left', pady=10)
-        # self.lat_entry = ttk.Entry(self.sun_frame_left_down, width=10)
-        # self.lat_entry.insert(0, '\u00B1dd mm ss')
-        # self.lat_entry.pack(side='left', padx=10)
-        # ttk.Label(self.sun_frame_left_down, text="longitude ").pack(side='left')
-        # self.lon_entry = ttk.Entry(self.sun_frame_left_down, width=10)
-        # self.lon_entry.insert(0, '\u00B1dd mm ss')
-        # self.lon_entry.pack(side='left', padx=10)
-        # self.slider_label = ttk.Label(self.sun_frame_right, text="Enter coordinates to calculate Sun elevation. "
-        #                                                         "Use ← and → to move Sun.")
-        # self.slider_label.pack(padx=10, pady=10)
-
-        # style = ttk.Style()
-        # style.configure("TScale", troughcolor="LightBlue", foreground="orange", background='orange')
-        # self.slider = ttk.Scale(self.sun_frame_right, from_=0, to=24 * 60, length=self.win_x * 0.4, orient="horizontal",
-        #                         style="TScale")
-        # self.slider.pack(padx=10, pady=10)
-        #
-        # self.slider.bind("<Motion>", self.update_elevation)
-        # self.root.bind("<Left>", self.slide_left)
-        # self.root.bind("<Right>", self.slide_right)
 
         ### frame for updating, selection and entering data ###
-        self.left_frame = tk.Frame(self.root)
+        self.left_frame = tk.Frame(self.root, width=0.4 * self.win_x)
         self.left_frame.pack(side='top', pady=20)
         ttk.Label(self.left_frame,
-                  text="Welcome to AltiFore! Here you can prognose altimeters tracks. \n"
-                       "Select a .KML file or enter your vessel track manually. \n\n"
-                       "After calculation, you will receive a .PNG map with marked altitracks,\n "
-                       "a .XLSX with a daily schedule and .TXT with description of each span. \n\n"
+                  text="Welcome to AltiFore!\n"
+                       "Select a .KML file or enter vessels track in table\n"
+                       "You will receive a .PNG map with marked altitracks,\n "
+                       "a .XLSX with a daily schedule and .TXT with description.\n\n"
                        "In any unclear situation, please restart the app.\n\n"
                        "!!!!! ALL TIMES IN UTC FORMAT !!!!!", justify='center').pack(side='top')
 
@@ -108,7 +69,7 @@ class MainWindow:
         self.ship_time_fr.pack(side="top", pady=10)
         self.ship_time_lab = tk.Label(self.ship_time_fr, text="Ship timezone   >>>   ")
         self.ship_time_lab.pack(side="left")
-        self.ship_time_entry = tk.Entry(self.ship_time_fr, width=5)
+        self.ship_time_entry = tk.Entry(self.ship_time_fr, width=3)
         self.ship_time_entry.insert(0, SHIP_TIME)
         self.ship_time_entry.pack(side="left")
         self.tooltip_label = tk.Label(self.map_frame, text="Calculate smth to show a map", padx=5, pady=5)
@@ -134,7 +95,7 @@ class MainWindow:
         ### subframe update TLE button ###
         self.but_tle_frame = tk.Frame(self.tle_frame)
         self.but_tle_frame.pack(side='right', padx=5, pady=20)
-        self.but_tle_up = tk.Button(self.but_tle_frame, text='Update TLE!', command=self.click_update_tle, width=10,
+        self.but_tle_up = tk.Button(self.but_tle_frame, text='Update!', command=self.click_update_tle, width=5,
                                     bg='grey75')
         self.but_tle_up.pack()
 
@@ -142,7 +103,7 @@ class MainWindow:
         self.dist_frame = tk.Frame(self.left_frame)
         self.dist_frame.pack(side='top', padx=5, pady=20)
         ttk.Label(self.dist_frame, text="Distance between vessel and satellite tracks ").pack(side='left')
-        self.km_entry = ttk.Entry(self.dist_frame, width=5)
+        self.km_entry = ttk.Entry(self.dist_frame, width=4)
         self.km_entry.insert(0, "200")
         self.km_entry.pack(side='left')
         ttk.Label(self.dist_frame, text="km").pack(side='left')
@@ -160,8 +121,6 @@ class MainWindow:
         ### subframe for buttons and path ###
         self.select_frame_up = ttk.Frame(self.select_frame)
         self.select_frame_up.pack(side='top', pady=10, padx=10)
-        # self.but_select = tk.Button(self.select_frame_up, text='Select a file', bg='pink')
-        # self.but_select.pack(side='left', padx=10)
 
         if SELECT_FILE:
             self.but_select = tk.Button(self.select_frame_up, text='Select a file', command=self.click_select,
@@ -188,12 +147,12 @@ class MainWindow:
             now = dt.utcnow().strftime("%d/%m/%y %H:%M").split(" ")
 
             ttk.Label(self.select_frame_down, text='Start date').pack(side='left', padx=5)
-            self.date_entry = ttk.Entry(self.select_frame_down, width=10)
+            self.date_entry = ttk.Entry(self.select_frame_down, width=8)
             self.date_entry.insert(0, now[0])
             self.date_entry.pack(side='left', padx=10)
 
             ttk.Label(self.select_frame_down, text='Time').pack(side='left', padx=5)
-            self.time_entry = ttk.Entry(self.select_frame_down, width=6)
+            self.time_entry = ttk.Entry(self.select_frame_down, width=5)
             self.time_entry.insert(0, now[1])
             self.time_entry.pack(side='left', padx=10)
 
@@ -208,13 +167,13 @@ class MainWindow:
                                   highlightthickness=2)
         self.add_frame.pack(side='top', pady=10)
 
-        self.add_row_button = tk.Button(self.add_frame, text="Add new row", command=self.add_row_to_column,
+        self.add_row_button = tk.Button(self.add_frame, text="Add row", command=self.add_row_to_column,
                                         bg='LawnGreen')
-        self.add_row_button.pack(pady=10, side='left', padx=18)
-        self.calc_table_button = tk.Button(self.add_frame, text="Calculate from table!", command=self.click_tab)
-        self.calc_table_button.pack(pady=10, side='left', padx=18)
-        self.rem_row_button = tk.Button(self.add_frame, text="Remove last row", command=self.remove_row_from_column)
-        self.rem_row_button.pack(pady=10, side='right', padx=18)
+        self.add_row_button.pack(pady=10, side='left', padx=10)
+        self.calc_table_button = tk.Button(self.add_frame, text="Calculate!", command=self.click_tab)
+        self.calc_table_button.pack(pady=10, side='left', padx=10)
+        self.rem_row_button = tk.Button(self.add_frame, text="Remove row", command=self.remove_row_from_column)
+        self.rem_row_button.pack(pady=10, side='right', padx=10)
 
         ### frame for tabular ###
         self.table_frame = ttk.Frame(self.frame_green)
@@ -223,7 +182,7 @@ class MainWindow:
         ### subframes for tabular ###
         self.line_frames = []
         self.entry_arr = [[] for _ in range(4)]
-        labels = ["Date (dd/mm/yy)", "Time (hh:mm)", u"Latitude (\u00B1dd mm ss)", u"Longitude (\u00B1dd mm ss)"]
+        labels = ["Date\n(dd/mm/yy)", "Time\n(hh:mm)", u"Latitude\n(\u00B1dd mm ss)", u"Longitude\n(\u00B1dd mm ss)"]
         for column in range(4):
             frame = tk.Frame(self.table_frame)
             frame.pack(side="left", padx=int(self.win_x * 0.008), pady=5)
@@ -252,37 +211,6 @@ class MainWindow:
         self.circ_cent_lon = 0
         self.circ_cent_lat = 0
         self.start_date = None  # start date of calculation
-
-    def update_elevation(self, event):
-        """
-        updating elevation of Sun when user clicks on left or right arrow or on slider
-        """
-
-        selected_hour = int(self.slider.get() / 60)
-        selected_min = int(self.slider.get() - 60 * selected_hour)
-
-        if selected_hour == 24:  # case if 24:00 -> 23:59
-            selected_hour = 23
-            selected_min = 59
-
-        try:
-            lat_str = list(map(int, self.lat_entry.get().split()))
-            lat = np.sign(lat_str[0]) * (np.abs(lat_str[0]) + (lat_str[1] + lat_str[2] / 60.) / 60.)
-            lon_str = list(map(int, self.lon_entry.get().split()))
-            lon = np.sign(lon_str[0]) * (np.abs(lon_str[0]) + (lon_str[1] + lon_str[2] / 60.) / 60.)
-
-            dat_str = self.dat_entry.get().split('/')
-            selected_time = dt(int(dat_str[-1]), int(dat_str[-2]), int(dat_str[-3]), int(selected_hour),
-                               int(selected_min))
-
-            elevation = calc_sun(lat, lon, selected_time)
-
-            self.slider_label.config(
-                text=f"Selected time: {selected_hour:2d}:{selected_min:2d} UTC       "
-                     f"Sun Elevation: {elevation:.2f}" + chr(176))
-
-        except:
-            pass
 
     def slide_left(self, event):
         """
@@ -570,10 +498,7 @@ class MainWindow:
 
         self.scat_loc = self.ax.scatter(self.tr_lon, self.tr_lat, label='Маршрут', zorder=10, marker='+',
                                         color=self.col_loc, s=3, transform=ccrs.PlateCarree())
-        # self.circ =
-        #
-        #     Circle((0, -89.9), self.distance / 111., fill=False, color='aqua', transform=ccrs.PlateCarree())
-        # self.ax.add_artist(self.circ)
+
         self.circ, = self.ax.plot([0], [-89.9], color="black", transform=ccrs.PlateCarree(), zorder=9)
         self.circ_cent_lat = -89.9
         self.circ_cent_lon = 0
@@ -644,11 +569,10 @@ class MainWindow:
                 deg_lon = round(np.fix(self.draw_arr[arg, 0]))
                 min_lon = int((self.draw_arr[arg, 0] - deg_lon) * 60 * np.sign(self.draw_arr[arg, 0]))
 
-                coords = " Lat: " + str(deg_lat) + chr(176) + str(min_lat)
-                coords += "', Lon: " + str(deg_lon) + chr(176) + str(min_lon) + "'"
+                coords = f" Lat: {deg_lat:3.0f}° {min_lat:2.0f}', Lon: {deg_lon:3.0f}° {min_lon:2.0f}'"
 
-                message = f"{SAT_NAMES[int(self.draw_arr[arg, 2])]} : " + fl_time + " (" + fl_ship + ") " \
-                          + coords + f", Dist = {self.draw_arr[arg, 3]} km"
+                message = f"{SAT_NAMES[int(self.draw_arr[arg, 2])]} : " + fl_time + " (" + fl_ship + ")\n" \
+                          + coords + f", Dist = {self.draw_arr[arg, 3]:3.0f} km"
 
                 if self.circ_cent_lon != self.draw_arr[arg, -2] and self.circ_cent_lat != self.draw_arr[arg, -3]:
                     # updating place of circle
@@ -665,26 +589,14 @@ class MainWindow:
                     self.circ.remove()
                     self.circ, = self.ax.plot(circle_arr[:, 0], circle_arr[:, 1], transform=ccrs.PlateCarree(),
                                               color='black', lw=0.5)
-
-                    # self.circ.center = self.draw_arr[arg, -2], self.draw_arr[arg, -3]
-                    # self.circ.radius = self.draw_arr[arg, 3] / 111. / np.cos(self.draw_arr[arg, -3] / 180. * np.pi)
-                    self.col_loc = ['black' for s in self.tr_lat]
+                    self.col_loc = ['black'] * len(self.tr_lat)
                     self.col_loc[int(self.draw_arr[arg, -1])] = 'red'
-
-                # if self.circ.center[0] != self.draw_arr[arg, -2] and self.circ.center[1] != self.draw_arr[arg, -3]:
-                #     # updating place of circle
-                #     self.circ.center = self.draw_arr[arg, -2], self.draw_arr[arg, -3]
-                #     self.circ.radius = self.draw_arr[arg, 3] / 111. / np.cos(self.draw_arr[arg, -3] / 180. * np.pi)
-                #     self.col_loc = ['black' for s in self.tr_lat]
-                #     self.col_loc[int(self.draw_arr[arg, -1])] = 'aqua'
 
             else:
                 # removing circle and colorful points
                 self.col_loc = ['black' for s in self.tr_lat]
-                # self.circ.remove()
                 self.circ_cent_lat = -89.9
                 self.circ_cent_lon = 0
-                # self.circ.center = 0, -89.9
 
             self.scat_loc.remove()
             # updating a color of track points
@@ -697,13 +609,11 @@ class MainWindow:
                 m_lat = int((y - d_lat) * 60 * np.sign(y))
                 d_lon = round(np.fix(x))
                 m_lon = int((x - d_lon) * 60 * np.sign(x))
-                message = "Lat: "
-                message += (str(d_lat) + chr(176) + str(m_lat) + "', Lon: " + str(d_lon) + chr(176) + str(m_lon)) + "'"
-
+                message = f"\nLat: {d_lat:3.0f}° {m_lat:2.0f}', Lon: {d_lon:3.0f}° {m_lon:2.0f}'"
         else:
             message = "Hover on map"
 
-        self.tooltip_label.config(text=message)
+        self.tooltip_label.config(text=message, font=("TkDefaultFont", 16))
 
     def run(self):
         self.root.mainloop()

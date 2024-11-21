@@ -2,8 +2,8 @@ import openpyxl  # conda install -c conda-forge openpyxl
 from openpyxl.styles import PatternFill
 import pandas as pd  # conda install -c conda-forge pandas
 import datetime as dt
-from calculator import calc_sunset_sunrise
 from const import SAT_NAMES, color_rgd
+from calculator import calc_sunset_sunrise
 
 
 def convert_list(name, sheet, res_list):
