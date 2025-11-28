@@ -1,0 +1,99 @@
+SENTINEL-3A 2025-11-28 17:43
+lat -64.763, lon 82.666, dist 146.97 km
+
+SENTINEL-6 2025-11-28 19:05
+lat -63.78, lon 80.94, dist 184.71 km
+
+SENTINEL-2A 2025-11-28 18:23
+lat -65.067, lon 80.555, dist 63.76 km
+
+SENTINEL-6 2025-11-28 21:01
+lat -66.146, lon 78.385, dist 85.79 km
+
+SWOT 2025-11-29 00:41
+lat -65.848, lon 76.369, dist 28.35 km
+
+SARAL 2025-11-29 02:11
+lat -66.148, lon 75.655, dist 62.46 km
+
+SENTINEL-3A 2025-11-29 03:36
+lat -66.139, lon 75.872, dist 51.72 km
+
+SENTINEL-2A 2025-11-29 04:14
+lat -65.91, lon 74.386, dist 123.79 km
+
+CRYOSAT 2 2025-11-29 05:35
+lat -66.584, lon 81.174, dist 187.52 km
+
+CRYOSAT 2 2025-11-29 16:57
+lat -69.052, lon 80.363, dist 140.49 km
+
+SENTINEL-3B 2025-11-29 18:21
+lat -68.365, lon 77.33, dist 52.19 km
+
+SWOT 2025-11-30 00:41
+lat -67.21, lon 75.978, dist 93.38 km
+
+CRYOSAT 2 2025-11-30 06:23
+lat -66.929, lon 68.412, dist 188.17 km
+
+CRYOSAT 2 2025-11-30 17:45
+lat -65.558, lon 68.572, dist 41.21 km
+
+SENTINEL-3A 2025-11-30 18:31
+lat -64.992, lon 70.861, dist 160.91 km
+
+SENTINEL-2A 2025-11-30 19:03
+lat -64.952, lon 70.546, dist 168.97 km
+
+SENTINEL-6 2025-11-30 21:45
+lat -66.042, lon 66.352, dist 67.69 km
+
+SENTINEL-3A 2025-12-01 04:24
+lat -65.538, lon 64.469, dist 79.06 km
+
+SENTINEL-2A 2025-12-01 04:54
+lat -65.654, lon 64.749, dist 117.18 km
+
+SWOT 2025-12-01 09:28
+lat -65.346, lon 61.352, dist 55.02 km
+
+SARAL 2025-12-01 12:38
+lat -65.326, lon 60.218, dist 66.38 km
+
+CRYOSAT 2 2025-12-01 18:33
+lat -65.031, lon 55.851, dist 10.71 km
+
+SENTINEL-3A 2025-12-01 19:46
+lat -65.549, lon 52.779, dist 144.14 km
+
+SENTINEL-6 2025-12-01 20:10
+lat -63.959, lon 56.351, dist 129.27 km
+
+SENTINEL-2A 2025-12-01 20:13
+lat -65.354, lon 53.404, dist 94.3 km
+
+SENTINEL-6 2025-12-01 22:06
+lat -66.132, lon 54.393, dist 123.66 km
+
+SARAL 2025-12-02 03:56
+lat -65.575, lon 48.927, dist 154.08 km
+
+SENTINEL-3B 2025-12-02 05:03
+lat -65.742, lon 54.933, dist 197.68 km
+
+SENTINEL-2A 2025-12-02 06:04
+lat -64.691, lon 48.154, dist 125.79 km
+
+CRYOSAT 2 2025-12-02 19:22
+lat -66.671, lon 42.529, dist 161.44 km
+
+SENTINEL-3B 2025-12-02 20:24
+lat -67.082, lon 45.119, dist 35.14 km
+
+SENTINEL-6 2025-12-02 22:28
+lat -66.143, lon 44.92, dist 132.53 km
+
+SWOT 2025-12-03 02:26
+lat -67.698, lon 43.556, dist 73.64 km
+

@@ -80,7 +80,7 @@ def calc(distance, lats, lons, times, save_name):
     except:
         return -1, -1
 
-    sats = load.tle_file(path_to_af + 'tle/tle_data.txt')
+    sats = load.tle_file(path_to_af + 'tle/tle_ilya.txt') #
 
     try:
         sat_data = [{sat.name: sat for sat in sats}[name] for name in SAT_NAMES]
