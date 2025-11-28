@@ -373,9 +373,7 @@ class MainWindow:
             num_of_days = (datetimes[-1] - datetimes[0]).days + 1
             res_sheet = prepare_sheet(datetimes[0], num_of_days)
             path_to_save = self.save_name.get()
-
             convert_list(path_to_save + ".xlsx", res_sheet, self.res_list)
-
             self.draw_map()
 
     def click_calc_file(self):
@@ -417,11 +415,16 @@ class MainWindow:
             messagebox.showerror('Altifore: Saving error', 'Check path for saving!')
             return 0
 
-        num_of_days = (last_date - self.start_date).days + 2
-        res_sheet = prepare_sheet(self.start_date, num_of_days)
-        path_to_save = self.save_name.get()
-        convert_list(path_to_save + ".xlsx", res_sheet, self.res_list)
-        self.draw_map()
+        if len(self.draw_arr) == 0:
+            messagebox.showwarning("AltiFore: Calculation Warning", "No flights for entered data :(")
+            self.tr_lat = []
+            self.tr_lon = []
+        else:
+            num_of_days = (last_date - self.start_date).days + 2
+            res_sheet = prepare_sheet(self.start_date, num_of_days)
+            path_to_save = self.save_name.get()
+            convert_list(path_to_save + ".xlsx", res_sheet, self.res_list)
+            self.draw_map()
 
     def add_row_to_column(self):
         """
@@ -486,7 +489,6 @@ class MainWindow:
         gl.yformatter = LATITUDE_FORMATTER
         gl.xlabel_style = {'size': 4}
         gl.ylabel_style = {'size': 4}
-
         self.col_scat = [colors[int(s)] for s in self.draw_arr[:, 2]]
         self.col_loc = ['black' for s in self.tr_lat]
         self.sat_scat = self.ax.scatter(self.draw_arr[:, 0], self.draw_arr[:, 1], edgecolors=self.col_scat, s=3,
