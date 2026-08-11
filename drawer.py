@@ -37,8 +37,8 @@ class MainWindow:
         self.res_list = np.ndarray  # array for creating a schedule {sat_name, date, time, dist, color}
         self.tr_lat = []  # input track latitudes
         self.tr_lon = []  # input track longitudes
-        self.win_x = int(monitor_size[0] * 0.8)  # width of main window
-        self.win_y = int(monitor_size[1] * 0.8)  # height of main window
+        self.win_x = int(monitor_size[0])  # width of main window
+        self.win_y = int(monitor_size[1])  # height of main window
         self.center_x = int(0.5 * (monitor_size[0] - self.win_x))  # x coord of center of main window
         self.center_y = int(0.5 * (monitor_size[1] - self.win_y))  # y coord of center of main window
 
@@ -47,7 +47,7 @@ class MainWindow:
         self.root.geometry(f'{self.win_x}x{self.win_y}+{self.center_x}+{self.center_y}')
 
         ### frame for sun and map ###
-        self.right_frame = tk.Frame(self.root, width=0.6 * self.win_x)
+        self.right_frame = tk.Frame(self.root, width=0.7 * self.win_x)
         self.right_frame.pack(side='right', expand=True, fill='both')
         self.right_frame.pack_propagate(False)
 
@@ -55,15 +55,15 @@ class MainWindow:
         self.map_frame.pack(side='top', expand=True, fill='both')
 
         ### frame for updating, selection and entering data ###
-        self.left_frame = tk.Frame(self.root, width=0.4 * self.win_x)
+        self.left_frame = tk.Frame(self.root, width=0.3 * self.win_x)
         self.left_frame.pack(side='top', pady=20)
         ttk.Label(self.left_frame,
                   text="Welcome to AltiFore!\n"
                        "Select a .KML file or enter vessels track in table\n"
                        "You will receive a .PNG map with marked altitracks,\n "
                        "a .XLSX with a daily schedule and .TXT with description.\n\n"
-                       "In any unclear situation, please restart the app.\n\n"
-                       "!!!!! ALL TIMES IN UTC FORMAT !!!!!", justify='center').pack(side='top')
+                       "In any unclear situation, please restart the app.\n"
+                       , justify='center').pack(side='top')
 
         self.ship_time_fr = tk.Frame(self.left_frame)
         self.ship_time_fr.pack(side="top", pady=10)
@@ -76,17 +76,17 @@ class MainWindow:
         self.tooltip_label.pack(side='bottom')
 
         ### frame for TLE progress bar and update button ###
-        self.tle_frame = tk.Frame(self.left_frame, highlightbackground="black", highlightthickness=2)
-        self.tle_frame.pack(side='top', pady=20)
+        self.tle_frame = tk.Frame(self.left_frame, highlightthickness=2)
+        self.tle_frame.pack(side='top', pady=15)
 
         ### subframe for progress bar ###
         self.bar_frame = tk.Frame(self.tle_frame)
-        self.bar_frame.pack(side='left', pady=20, padx=5)
+        self.bar_frame.pack(side='left', pady=15, padx=5)
         self.sty = ttk.Style(self.root)
         self.sty.layout("LabeledProgressbar", [('LabeledProgressbar.trough', {
             'children': [('LabeledProgressbar.pbar', {'side': 'left', 'sticky': 'ns'}),
                          ("LabeledProgressbar.label", {"sticky": ""})], 'sticky': 'nswe'})])
-        self.bar = ttk.Progressbar(self.bar_frame, orient="horizontal", length=int(self.win_x * 0.3),
+        self.bar = ttk.Progressbar(self.bar_frame, orient="horizontal", length=int(self.win_x * 0.25),
                                    style="LabeledProgressbar")
         self.bar.pack()
         tle_date = open(path_to_af + "tle/tle_data.txt", 'r').readline()[16:-1]
@@ -114,7 +114,7 @@ class MainWindow:
         self.save_name.pack(side='top', pady=10)
 
         ### frame for selecting a file ###
-        self.select_frame = tk.Frame(self.left_frame, highlightbackground="pink", highlightcolor="pink",
+        self.select_frame = tk.Frame(self.left_frame, #highlightbackground="pink", highlightcolor="pink",
                                      highlightthickness=2)
         self.select_frame.pack(side='top', padx=10, pady=10)
 
@@ -126,7 +126,7 @@ class MainWindow:
             self.but_select = tk.Button(self.select_frame_up, text='Select a file', command=self.click_select,
                                         bg='pink')
         else:
-            self.but_select = tk.Button(self.select_frame_up, text='Select a file', bg='pink')
+            self.but_select = tk.Button(self.select_frame_up, text='Select a file')
         self.but_select.pack(side='left', padx=10)
 
         ### subframe for speed and start_date entries ###
@@ -155,8 +155,9 @@ class MainWindow:
             self.time_entry = ttk.Entry(self.select_frame_down, width=5)
             self.time_entry.insert(0, now[1])
             self.time_entry.pack(side='left', padx=10)
+            ttk.Label(self.select_frame_down, text='UTC').pack(side='left', padx=5)
 
-            tk.Button(self.select_frame_up, text="Calculate from file!", command=self.click_calc_file, bg='pink').pack(
+            tk.Button(self.select_frame_up, text="Calculate from file!", command=self.click_calc_file, bg='Lime').pack(
                 side='right', padx=5)
 
         self.frame_green = ttk.Frame(self.left_frame)
@@ -170,6 +171,7 @@ class MainWindow:
         self.add_row_button = tk.Button(self.add_frame, text="Add row", command=self.add_row_to_column,
                                         bg='LawnGreen')
         self.add_row_button.pack(pady=10, side='left', padx=10)
+
         self.calc_table_button = tk.Button(self.add_frame, text="Calculate!", command=self.click_tab)
         self.calc_table_button.pack(pady=10, side='left', padx=10)
         self.rem_row_button = tk.Button(self.add_frame, text="Remove row", command=self.remove_row_from_column)
@@ -373,8 +375,11 @@ class MainWindow:
             num_of_days = (datetimes[-1] - datetimes[0]).days + 1
             res_sheet = prepare_sheet(datetimes[0], num_of_days)
             path_to_save = self.save_name.get()
-            convert_list(path_to_save + ".xlsx", res_sheet, self.res_list)
-            self.draw_map()
+            aa = convert_list(path_to_save + ".xlsx", res_sheet, self.res_list)
+            if aa == -1:
+                messagebox.showwarning("AltiFore: Processing Error", "Close excel file!!!")
+            else:
+                self.draw_map()
 
     def click_calc_file(self):
         """
@@ -453,18 +458,21 @@ class MainWindow:
         """
         drawing a map
         """
-        self.fig = plt.figure(figsize=(4, 8), dpi=300)
+        self.fig = plt.figure(figsize=(6, 6), dpi=300)
+
         # limits
-        lat_min = int(np.min(self.tr_lat)) - 3
-        lat_max = int(np.max(self.tr_lat)) + 3
-        lon_min = int(np.min(self.tr_lon)) - 3
-        lon_max = int(np.max(self.tr_lon)) + 3
+        lat_min = int(np.min(self.tr_lat) - 3)
+        lat_max = int(np.max(self.tr_lat) + 3)
+        lon_min = int(np.min(self.tr_lon) - 3 / np.cos(np.deg2rad(np.mean(self.tr_lat))))
+        lon_max = int(np.max(self.tr_lon) + 3 / np.cos(np.deg2rad(np.mean(self.tr_lat))))
         if PROJECTION == "Ortho":
             self.ax = self.fig.add_subplot(1, 1, 1, projection=ccrs.Orthographic(0.5 * (lon_min + lon_max),
                                                                                  0.5 * (lat_min + lat_max)))
+
         else:
             self.ax = self.fig.add_subplot(1, 1, 1, projection=ccrs.Mercator())
         self.ax.set_extent([lon_min, lon_max, lat_min, lat_max])
+        self.ax.set_aspect('equal', adjustable='box')
         # tick steps
         step_lon = (lon_max - lon_min) / 10.
         step_lat = (lat_max - lat_min) / 10.

@@ -1,7 +1,8 @@
-import openpyxl  # conda install -c conda-forge openpyxl
-from openpyxl.styles import PatternFill
-import pandas as pd  # conda install -c conda-forge pandas
+import pandas as pd
 import datetime as dt
+from string import ascii_uppercase
+from openpyxl import load_workbook
+from openpyxl.styles import PatternFill
 from const import SAT_NAMES, color_rgd
 from calculator import calc_sunset_sunrise
 
@@ -35,33 +36,36 @@ def convert_list(name, sheet, res_list):
         sheet.dropna(axis=1, how='all', inplace=True)
         sheet = pd.concat([sheet, pd.DataFrame({'name': [sat_name for sat_name in SAT_NAMES]})], axis=1)
 
-        sheet.to_excel(name, index=False, engine='openpyxl')
-        wb = openpyxl.load_workbook(name)
-        ws = wb['Sheet1']
-        alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']
-
-        for s in range(len(SAT_NAMES)):
-            ws[str(alphabet[sheet.shape[1] - 1] + str(s + 2))].fill = PatternFill(patternType='solid', fgColor=color_rgd[s])
-
-        letter = 2
-        # filling a color
         try:
-            row = (sheet.index[sheet['date'] == curr_date][0]) + 2
-            for i in range(len(res_list)):
-                if len(res_list[i]) != 0:
-                    if curr_date != res_list[i][0]['date']:
-                        curr_date = res_list[i][0]['date']
-                        letter = 2
-                        row = (sheet.index[sheet['date'] == curr_date][0]) + 2
+            sheet.to_excel(name, index=False, engine='openpyxl')
+            wb = load_workbook(name)
+            ws = wb['Sheet1']
+            alphabet = list(ascii_uppercase)
 
-                    for res_it in res_list[i]:
-                        letter += 1
-                        ws[str(alphabet[letter] + str(row))].fill = PatternFill(patternType='solid',
-                                                                                fgColor=res_it['color'])
-        except:
-            pass
+            for s in range(len(SAT_NAMES)):
+                ws[str(alphabet[sheet.shape[1] - 1] + str(s + 2))].fill = PatternFill(patternType='solid', fgColor=color_rgd[s])
 
-        wb.save(name)
+            letter = 2
+            # filling a color
+            try:
+                row = (sheet.index[sheet['date'] == curr_date][0]) + 2
+                for i in range(len(res_list)):
+                    if len(res_list[i]) != 0:
+                        if curr_date != res_list[i][0]['date']:
+                            curr_date = res_list[i][0]['date']
+                            letter = 2
+                            row = (sheet.index[sheet['date'] == curr_date][0]) + 2
+
+                        for res_it in res_list[i]:
+                            letter += 1
+                            ws[str(alphabet[letter] + str(row))].fill = PatternFill(patternType='solid',
+                                                                                    fgColor=res_it['color'])
+            except:
+                pass
+            wb.save(name)
+            return 0
+        except PermissionError:
+            return -1
 
 
 def prepare_sheet(start, nums):

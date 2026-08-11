@@ -1,13 +1,13 @@
-import numpy as np  # conda install -c conda-forge numpy
-from skyfield.api import load, wgs84, utc  # conda install -c conda-forge skyfield
-import geopy.distance as dist  # conda install -c conda-forge geopy
-import datetime as dt
-import fiona  # conda install -c conda-forge fiona
-import geopandas as gpd  # conda install -c conda-forge geopandas
-import pandas as pd  # conda install -c conda-forge pandas
-from const import *
-from pyproj import Geod
 import math
+import fiona
+import numpy as np
+import pandas as pd
+from const import *
+import datetime as dt
+import geopandas as gpd
+from pyproj import Geod
+import geopy.distance as dist
+from skyfield.api import load, wgs84
 
 geod = Geod(ellps="WGS84")
 
@@ -85,6 +85,7 @@ def calc(distance, lats, lons, times, save_name):
     try:
         sat_data = [{sat.name: sat for sat in sats}[name] for name in SAT_NAMES]
 
+        SAT_HEIGHTS.clear()  # reset heights, otherwise they accumulate across repeated calculations
         for s in sat_data:
             vec = s.at(ts.from_datetime(times[0])).position.km
             SAT_HEIGHTS.append(np.linalg.norm(np.array(vec)) - 6371)
