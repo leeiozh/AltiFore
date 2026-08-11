@@ -1,0 +1,54 @@
+name: Build Windows exe
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build exe
+        run: >
+          pyinstaller --onefile altifore.py
+          --hidden-import=PIL._tkinter_finder
+          --hidden-import=openpyxl.cell._writer
+
+      - name: Unpack bundled Natural Earth maps (all resolutions)
+        shell: bash
+        run: unzip -q MAPS_HERE.zip -d .
+
+      - name: Assemble portable app folder
+        shell: bash
+        run: |
+          set -e
+          OUT=dist/AltiFore
+          mkdir -p "$OUT"
+          mv dist/altifore.exe "$OUT/"
+          cp -r tle "$OUT/"
+          cp tomorrow.kml "$OUT/"
+          cp -r natural_earth "$OUT/"
+          mkdir -p "$OUT/forecasts"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AltiFore-windows
+          path: dist/AltiFore

@@ -1,6 +1,7 @@
 import platform
 import os
 import sys
+import cartopy
 
 os_var = platform.system()
 if os_var == 'Windows':
@@ -15,6 +16,11 @@ else:
     else:
         app_dir = os.path.dirname(os.path.abspath(__file__)) + '/forecasts/'
     path_to_af = app_dir[:-len(app_dir.split('/')[-1])]
+
+# use bundled Natural Earth shapefiles (all resolutions) next to the app instead of downloading them at runtime
+natural_earth_dir = os.path.join(path_to_af, 'natural_earth')
+if os.path.isdir(natural_earth_dir):
+    cartopy.config['pre_existing_data_dir'] = natural_earth_dir
 
 colors = ["chocolate", "salmon", "darkorange", "gold", "greenyellow", "mediumseagreen", "turquoise", "deepskyblue",
           "cornflowerblue", "violet", "mediumorchid"]

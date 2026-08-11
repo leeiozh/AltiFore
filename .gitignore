@@ -1,0 +1,22 @@
+# build artifacts
+build/
+dist/
+altifore
+altifore.exe
+__pycache__/
+*.pyc
+
+# python env
+alti_env/
+
+# generated forecasts (keep the repo as an example only)
+forecasts/*
+!forecasts/.gitkeep
+
+old_forecasts/
+track/
+
+# unbundled Natural Earth data extracted from MAPS_HERE.zip
+natural_earth/
+
+.idea/.name
